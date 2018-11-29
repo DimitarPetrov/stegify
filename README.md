@@ -1,0 +1,2 @@
+# stegify
+Steganography CLI tool
