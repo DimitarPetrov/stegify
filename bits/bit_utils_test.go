@@ -6,7 +6,7 @@ import (
 )
 
 func TestSetLastTwoBits(t *testing.T) {
-	var tests = []struct{
+	var tests = []struct {
 		b, v, result byte
 	}{
 		{byte(134), byte(157), byte(133)},

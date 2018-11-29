@@ -1,14 +1,14 @@
 package bits
 
 const (
-	firstQuarter = 192
+	firstQuarter  = 192
 	secondQuarter = 48
-	thirdQuarter = 12
+	thirdQuarter  = 12
 	fourthQuarter = 3
 )
 
 func QuartersOfByte(b byte) [4]byte {
-	return [4]byte {b & firstQuarter, b & secondQuarter, b & thirdQuarter, b & fourthQuarter}
+	return [4]byte{b & firstQuarter, b & secondQuarter, b & thirdQuarter, b & fourthQuarter}
 }
 
 func ClearLastTwoBits(b byte) byte {
