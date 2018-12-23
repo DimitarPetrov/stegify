@@ -8,7 +8,7 @@ const (
 	fourthQuarter = 3
 )
 
-//QuartersOfByte returns a byte's four quarters ot bits
+//QuartersOfByte returns a byte's four quarters of bits
 func QuartersOfByte(b byte) [4]byte {
 	return [4]byte{b & firstQuarter >> 6, b & secondQuarter >> 4, b & thirdQuarter >> 2, b & fourthQuarter}
 }
