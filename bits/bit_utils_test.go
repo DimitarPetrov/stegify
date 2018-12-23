@@ -9,10 +9,11 @@ func TestSetLastTwoBits(t *testing.T) {
 	var tests = []struct {
 		b, v, result byte
 	}{
-		{byte(134), byte(157), byte(133)},
-		{byte(123), byte(153), byte(121)},
-		{byte(234), byte(242), byte(234)},
-		{byte(23), byte(46), byte(22)},
+		{byte(134), byte(1), byte(133)},
+		{byte(123), byte(1), byte(121)},
+		{byte(234), byte(2), byte(234)},
+		{byte(23), byte(2), byte(22)},
+		{byte(134), byte(3), byte(135)},
 	}
 
 	for _, test := range tests {

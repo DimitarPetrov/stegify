@@ -8,13 +8,13 @@ const (
 )
 
 func QuartersOfByte(b byte) [4]byte {
-	return [4]byte{b & firstQuarter, b & secondQuarter, b & thirdQuarter, b & fourthQuarter}
+	return [4]byte{b & firstQuarter >> 6, b & secondQuarter >> 4, b & thirdQuarter >> 2, b & fourthQuarter}
 }
 
-func ClearLastTwoBits(b byte) byte {
+func clearLastTwoBits(b byte) byte {
 	return b & byte(252)
 }
 
 func SetLastTwoBits(b byte, value byte) byte {
-	return ClearLastTwoBits(b) | QuartersOfByte(value)[3]
+	return clearLastTwoBits(b) | value
 }
