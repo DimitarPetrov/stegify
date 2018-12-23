@@ -1,7 +1,10 @@
 package main
 
-import "stegify/steg"
+import (
+	"fmt"
+	"stegify/steg"
+)
 
 func main() {
-	steg.Encode("test2.png", "README.md")
+	fmt.Println(steg.Encode("test.jpeg", "test.png"))
 }

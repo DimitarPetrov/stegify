@@ -82,6 +82,15 @@ func Encode(carrierFileName string, dataFileName string) error {
 		}
 	}
 
+	select {
+		case _, ok := <-dataBytes:
+			if ok {
+				return fmt.Errorf("data file too large for this carrier")
+			}
+		default:
+
+	}
+
 	setDataSizeHeader(RGBAImage, bytesOf(dataCount))
 
 	resultFile, err := os.Create("steg_result" + carrierFileName[strings.LastIndex(carrierFileName, "."):])

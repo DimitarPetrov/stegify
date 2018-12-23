@@ -21,3 +21,13 @@ func clearLastTwoBits(b byte) byte {
 func SetLastTwoBits(b byte, value byte) byte {
 	return clearLastTwoBits(b) | value
 }
+
+//GetLastTwoBits returns byte containing only last two bits of given byte
+func GetLastTwoBits(b byte) byte {
+	return b & fourthQuarter
+}
+
+//ConstructByteOfQuarters constructs a byte of it's four quarters given
+func ConstructByteOfQuarters(first, second, third, fourth byte) byte {
+	return (((first << 6) | (second << 4)) | third << 2) | fourth
+}
