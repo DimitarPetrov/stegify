@@ -9,7 +9,7 @@ import (
 )
 
 //Decode performs steganography decoding of data previously encoded by the Encode function.
-//The data is decoded from file carrier with name carrierFileName and it is saved in separate file named newFileName
+//The data is decoded from file carrier and it is saved in separate new file
 func Decode(carrierFileName string, newFileName string) error {
 	carrier, err := os.Open(carrierFileName)
 	defer carrier.Close()
@@ -27,36 +27,29 @@ func Decode(carrierFileName string, newFileName string) error {
 
 	dataBytes := make([]byte, 0, 2048)
 	resultBytes := make([]byte, 0, 2048)
+
 	dataCount := extractDataCount(RGBAImage)
 
-	count := 0
+	var count int
 
 	for x := 0; x < dx && dataCount > 0; x++ {
 		for y := 0; y < dy && dataCount > 0; y++ {
 
-			if count >= dataSizeReservedBytes {
+			if count >= dataSizeHeaderReservedBytes {
 				c := RGBAImage.RGBAAt(x, y)
 				dataBytes = append(dataBytes, bits.GetLastTwoBits(c.R), bits.GetLastTwoBits(c.G), bits.GetLastTwoBits(c.B))
 				dataCount -= 3
+			} else {
+				count += 4
 			}
-
-			count += 4
-
 		}
 	}
 
 	if dataCount < 0 {
-		dataBytes = dataBytes[:len(dataBytes)+dataCount]
+		dataBytes = dataBytes[:len(dataBytes)+dataCount] //remove bytes that are not part of data and mistakenly added
 	}
 
-	switch len(dataBytes) % 4 {
-	case 1:
-		dataBytes = append(dataBytes, byte(0), byte(0), byte(0))
-	case 2:
-		dataBytes = append(dataBytes, byte(0), byte(0))
-	case 3:
-		dataBytes = append(dataBytes, byte(0))
-	}
+	align(dataBytes) // len(dataBytes) must be aliquot of 4
 
 	for i := 0; i < len(dataBytes); i += 4 {
 		resultBytes = append(resultBytes, bits.ConstructByteOfQuartersAsSlice(dataBytes[i:i+4]))
@@ -73,6 +66,17 @@ func Decode(carrierFileName string, newFileName string) error {
 	return nil
 }
 
+func align(dataBytes []byte) {
+	switch len(dataBytes) % 4 {
+	case 1:
+		dataBytes = append(dataBytes, byte(0), byte(0), byte(0))
+	case 2:
+		dataBytes = append(dataBytes, byte(0), byte(0))
+	case 3:
+		dataBytes = append(dataBytes, byte(0))
+	}
+}
+
 func extractDataCount(RGBAImage *image.RGBA) int {
 	dataCountBytes := make([]byte, 0, 16)
 
@@ -81,8 +85,8 @@ func extractDataCount(RGBAImage *image.RGBA) int {
 
 	count := 0
 
-	for x := 0; x < dx && count < dataSizeReservedBytes; x++ {
-		for y := 0; y < dy && count < dataSizeReservedBytes; y++ {
+	for x := 0; x < dx && count < dataSizeHeaderReservedBytes; x++ {
+		for y := 0; y < dy && count < dataSizeHeaderReservedBytes; y++ {
 
 			c := RGBAImage.RGBAAt(x, y)
 			dataCountBytes = append(dataCountBytes, bits.GetLastTwoBits(c.R), bits.GetLastTwoBits(c.G), bits.GetLastTwoBits(c.B))

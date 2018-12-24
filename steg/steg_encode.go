@@ -12,10 +12,10 @@ import (
 	"strings"
 )
 
-const dataSizeReservedBytes = 20
+const dataSizeHeaderReservedBytes = 20 // 20 bytes results in 30 usable bits
 
-//Encode performs steganography encoding of data file with name dataFilaName in carrier file with name carrierFileName
-//and saves steganogrphy product in new file with name newFileName.
+//Encode performs steganography encoding of data file in carrier file
+//and saves the steganogrphy encoded product in new file.
 //For now there are some limitations for carrier, it could be only png image format.
 //There aren't any limitations for data file format
 func Encode(carrierFileName string, dataFileName string, newFileName string) error {
@@ -38,6 +38,7 @@ func Encode(carrierFileName string, dataFileName string, newFileName string) err
 
 	dataBytes := make(chan byte)
 	errChan := make(chan error)
+
 	go readData(dataFile, dataBytes, errChan)
 
 	dx := RGBAImage.Bounds().Dx()
@@ -51,7 +52,7 @@ func Encode(carrierFileName string, dataFileName string, newFileName string) err
 	for x := 0; x < dx && hasMoreBytes; x++ {
 		for y := 0; y < dy && hasMoreBytes; y++ {
 
-			if count >= dataSizeReservedBytes {
+			if count >= dataSizeHeaderReservedBytes {
 
 				c := RGBAImage.RGBAAt(x, y)
 
@@ -77,13 +78,14 @@ func Encode(carrierFileName string, dataFileName string, newFileName string) err
 					dataCount++
 				}
 				RGBAImage.SetRGBA(x, y, c)
+			} else {
+				count += 4
 			}
-			count += 4
 		}
 	}
 
 	select {
-	case _, ok := <-dataBytes:
+	case _, ok := <-dataBytes: // if there is more data
 		if ok {
 			return fmt.Errorf("data file too large for this carrier")
 		}
@@ -105,7 +107,7 @@ func Encode(carrierFileName string, dataFileName string, newFileName string) err
 	//case "jpeg" : jpeg.Encode(resultFile, RGBAImage, nil)
 	//case "gif" : gif.Encode(resultFile, RGBAImage, nil)
 	default:
-		return fmt.Errorf("unsupported format")
+		return fmt.Errorf("unsupported carrier format")
 	}
 
 	return nil
@@ -133,8 +135,8 @@ func setDataSizeHeader(RGBAImage *image.RGBA, dataCountBytes []byte) {
 
 	count := 0
 
-	for x := 0; x < dx && count < (dataSizeReservedBytes/4)*3; x++ {
-		for y := 0; y < dy && count < (dataSizeReservedBytes/4)*3; y++ {
+	for x := 0; x < dx && count < (dataSizeHeaderReservedBytes/4)*3; x++ {
+		for y := 0; y < dy && count < (dataSizeHeaderReservedBytes/4)*3; y++ {
 
 			c := RGBAImage.RGBAAt(x, y)
 			c.R = bits.SetLastTwoBits(c.R, dataCountBytes[count])
