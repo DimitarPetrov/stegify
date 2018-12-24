@@ -5,12 +5,10 @@ import (
 	"fmt"
 	"image"
 	"image/draw"
-	"image/gif"
-	"image/jpeg"
+	_ "image/gif"
+	_ "image/jpeg"
 	"image/png"
 	_ "image/png"
-	_ "image/jpeg"
-	_ "image/gif"
 	"io"
 	"os"
 	"stegify/bits"
@@ -102,8 +100,8 @@ func Encode(carrierFileName string, dataFileName string, newFileName string) err
 
 	switch format {
 		case "png" : png.Encode(resultFile, RGBAImage)
-		case "jpeg" : jpeg.Encode(resultFile, RGBAImage, nil)
-		case "gif" : gif.Encode(resultFile, RGBAImage, nil)
+		//case "jpeg" : jpeg.Encode(resultFile, RGBAImage, nil)
+		//case "gif" : gif.Encode(resultFile, RGBAImage, nil)
 		default: return fmt.Errorf("unsupported format")
 	}
 

@@ -23,14 +23,56 @@ func Decode(carrierFileName string, newFileName string) error {
 	dx := RGBAImage.Bounds().Dx()
 	dy := RGBAImage.Bounds().Dy()
 
-	dataBytes := make([]byte,0 , 2048)
+	dataBytes := make([]byte, 0, 2048)
+	resultBytes := make([]byte, 0, 2048)
 	dataCount := extractDataCount(RGBAImage)
 
+	count := 0
+
+	for x := 0; x < dx && dataCount > 0; x++ {
+		for y := 0; y < dy && dataCount > 0; y++ {
+
+
+			if count >= dataSizeReservedBytes {
+				c := RGBAImage.RGBAAt(x,y)
+				dataBytes = append(dataBytes, bits.GetLastTwoBits(c.R), bits.GetLastTwoBits(c.G), bits.GetLastTwoBits(c.B))
+				dataCount -= 3
+			}
+
+			count += 4
+
+		}
+	}
+
+	if dataCount < 0 {
+		dataBytes = dataBytes[:len(dataBytes) + dataCount]
+	}
+
+	switch len(dataBytes) % 4 {
+		case 1 :
+			dataBytes = append(dataBytes, byte(0), byte(0), byte(0))
+		case 2 :
+			dataBytes = append(dataBytes, byte(0), byte(0))
+		case 3:
+			dataBytes = append(dataBytes, byte(0))
+	}
+
+	for i := 0; i < len(dataBytes); i+=4 {
+		resultBytes = append(resultBytes, bits.ConstructByteOfQuartersAsSlice(dataBytes[i:i+4]))
+	}
+
+	resultFile, err := os.Create(newFileName)
+	defer resultFile.Close()
+	if err != nil {
+		return fmt.Errorf("error creating result file: %v", err)
+	}
+
+	resultFile.Write(resultBytes)
 
 	return nil
 }
 
-func extractDataCount(RGBAImage *image.RGBA) uint32 {
+func extractDataCount(RGBAImage *image.RGBA) int {
 	dataCountBytes := make([]byte, 0, 16)
 
 	dx := RGBAImage.Bounds().Dx()
@@ -61,5 +103,5 @@ func extractDataCount(RGBAImage *image.RGBA) uint32 {
 						   bits.ConstructByteOfQuartersAsSlice(dataCountBytes[8:12]),
 						   bits.ConstructByteOfQuartersAsSlice(dataCountBytes[12:])}
 
-	return binary.LittleEndian.Uint32(bs)
+	return int(binary.LittleEndian.Uint32(bs))
 }
