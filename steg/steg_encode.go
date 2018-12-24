@@ -7,6 +7,7 @@ import (
 	"image"
 	"image/draw"
 	"image/png"
+	_ "image/jpeg" //register jpeg image format
 	"io"
 	"os"
 	"strings"
@@ -16,8 +17,6 @@ const dataSizeHeaderReservedBytes = 20 // 20 bytes results in 30 usable bits
 
 //Encode performs steganography encoding of data file in carrier file
 //and saves the steganography encoded product in new file.
-//For now there are some limitations for carrier, it could be only png image format.
-//There aren't any limitations for data file format
 func Encode(carrierFileName string, dataFileName string, newFileName string) error {
 	carrier, err := os.Open(carrierFileName)
 	defer carrier.Close()
@@ -102,9 +101,8 @@ func Encode(carrierFileName string, dataFileName string, newFileName string) err
 	}
 
 	switch format {
-	case "png":
+	case "png", "jpeg":
 		png.Encode(resultFile, RGBAImage)
-	//case "jpeg" : jpeg.Encode(resultFile, RGBAImage, nil)
 	//case "gif" : gif.Encode(resultFile, RGBAImage, nil)
 	default:
 		return fmt.Errorf("unsupported carrier format")
