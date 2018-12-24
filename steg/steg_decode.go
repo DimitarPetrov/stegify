@@ -3,9 +3,9 @@ package steg
 import (
 	"encoding/binary"
 	"fmt"
+	"github.com/DimitarPetrov/stegify/bits"
 	"image"
 	"os"
-	"stegify/bits"
 )
 
 //Decode performs steganography decoding of data previously encoded by the Encode function.

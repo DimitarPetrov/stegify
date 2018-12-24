@@ -3,8 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/DimitarPetrov/stegify/steg"
 	"os"
-	"stegify/steg"
 )
 
 var operation = flag.String("op", "", "operation (one of the following: encode, decode)")

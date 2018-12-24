@@ -3,12 +3,12 @@ package steg
 import (
 	"encoding/binary"
 	"fmt"
+	"github.com/DimitarPetrov/stegify/bits"
 	"image"
 	"image/draw"
 	"image/png"
 	"io"
 	"os"
-	"stegify/bits"
 	"strings"
 )
 
