@@ -5,10 +5,7 @@ import (
 	"fmt"
 	"image"
 	"image/draw"
-	_ "image/gif"
-	_ "image/jpeg"
 	"image/png"
-	_ "image/png"
 	"io"
 	"os"
 	"stegify/bits"
@@ -17,6 +14,10 @@ import (
 
 const dataSizeReservedBytes = 20
 
+//Encode performs steganography encoding of data file with name dataFilaName in carrier file with name carrierFileName
+//and saves steganogrphy product in new file with name newFileName.
+//For now there are some limitations for carrier, it could be only png image format.
+//There aren't any limitations for data file format
 func Encode(carrierFileName string, dataFileName string, newFileName string) error {
 	carrier, err := os.Open(carrierFileName)
 	defer carrier.Close()
@@ -44,8 +45,8 @@ func Encode(carrierFileName string, dataFileName string, newFileName string) err
 
 	hasMoreBytes := true
 
-	count := 0
-	var dataCount uint32 = 0
+	var count int
+	var dataCount uint32
 
 	for x := 0; x < dx && hasMoreBytes; x++ {
 		for y := 0; y < dy && hasMoreBytes; y++ {
@@ -75,22 +76,22 @@ func Encode(carrierFileName string, dataFileName string, newFileName string) err
 				if hasMoreBytes {
 					dataCount++
 				}
-				RGBAImage.SetRGBA(x,y,c)
+				RGBAImage.SetRGBA(x, y, c)
 			}
 			count += 4
 		}
 	}
 
 	select {
-		case _, ok := <-dataBytes:
-			if ok {
-				return fmt.Errorf("data file too large for this carrier")
-			}
-		default:
+	case _, ok := <-dataBytes:
+		if ok {
+			return fmt.Errorf("data file too large for this carrier")
+		}
+	default:
 
 	}
 
-	setDataSizeHeader(RGBAImage, bytesOf(dataCount))
+	setDataSizeHeader(RGBAImage, quartersOfBytesOf(dataCount))
 
 	resultFile, err := os.Create(newFileName + carrierFileName[strings.LastIndex(carrierFileName, "."):])
 	defer resultFile.Close()
@@ -99,20 +100,22 @@ func Encode(carrierFileName string, dataFileName string, newFileName string) err
 	}
 
 	switch format {
-		case "png" : png.Encode(resultFile, RGBAImage)
-		//case "jpeg" : jpeg.Encode(resultFile, RGBAImage, nil)
-		//case "gif" : gif.Encode(resultFile, RGBAImage, nil)
-		default: return fmt.Errorf("unsupported format")
+	case "png":
+		png.Encode(resultFile, RGBAImage)
+	//case "jpeg" : jpeg.Encode(resultFile, RGBAImage, nil)
+	//case "gif" : gif.Encode(resultFile, RGBAImage, nil)
+	default:
+		return fmt.Errorf("unsupported format")
 	}
 
 	return nil
 }
 
-func bytesOf(counter uint32) []byte {
+func quartersOfBytesOf(counter uint32) []byte {
 	bs := make([]byte, 4)
 	binary.LittleEndian.PutUint32(bs, counter)
 	quarters := make([]byte, 16)
-	for i := 0; i < 16; i+= 4 {
+	for i := 0; i < 16; i += 4 {
 		quarters[i] = bits.QuartersOfByte(bs[i/4])[0]
 		quarters[i+1] = bits.QuartersOfByte(bs[i/4])[1]
 		quarters[i+2] = bits.QuartersOfByte(bs[i/4])[2]
@@ -130,18 +133,14 @@ func setDataSizeHeader(RGBAImage *image.RGBA, dataCountBytes []byte) {
 
 	count := 0
 
-	for x := 0; x < dx; x++ {
-		for y := 0; y < dy; y++ {
+	for x := 0; x < dx && count < (dataSizeReservedBytes/4)*3; x++ {
+		for y := 0; y < dy && count < (dataSizeReservedBytes/4)*3; y++ {
 
-			if count >= (dataSizeReservedBytes / 4) * 3 {
-				break
-			}
-
-			c := RGBAImage.RGBAAt(x,y)
+			c := RGBAImage.RGBAAt(x, y)
 			c.R = bits.SetLastTwoBits(c.R, dataCountBytes[count])
 			c.G = bits.SetLastTwoBits(c.G, dataCountBytes[count+1])
 			c.B = bits.SetLastTwoBits(c.B, dataCountBytes[count+2])
-			RGBAImage.SetRGBA(x,y,c)
+			RGBAImage.SetRGBA(x, y, c)
 
 			count += 3
 
@@ -150,25 +149,25 @@ func setDataSizeHeader(RGBAImage *image.RGBA, dataCountBytes []byte) {
 
 }
 
-func setColorSegment(colorSegment *byte, data <-chan byte, errChan <-chan error) (hasMoreBytes bool, err error){
+func setColorSegment(colorSegment *byte, data <-chan byte, errChan <-chan error) (hasMoreBytes bool, err error) {
 
 	select {
-		case byte, ok := <-data:
-			if !ok {
-				return false, nil
-			} else {
-				*colorSegment = bits.SetLastTwoBits(*colorSegment,byte)
-				return true, nil
-			}
+	case byte, ok := <-data:
+		if !ok {
+			return false, nil
+		} else {
+			*colorSegment = bits.SetLastTwoBits(*colorSegment, byte)
+			return true, nil
+		}
 
-		case err := <-errChan:
-			return false, err
+	case err := <-errChan:
+		return false, err
 
 	}
 
 }
 
-func readData(reader io.Reader, bytes chan<-byte, errChan chan<-error) {
+func readData(reader io.Reader, bytes chan<- byte, errChan chan<- error) {
 	byte := make([]byte, 1)
 	for {
 		if _, err := reader.Read(byte); err != nil {
@@ -188,9 +187,9 @@ func readData(reader io.Reader, bytes chan<-byte, errChan chan<-error) {
 
 func getImageAsRGBA(reader io.Reader) (*image.RGBA, string, error) {
 
-	img, format ,err := image.Decode(reader)
+	img, format, err := image.Decode(reader)
 	if err != nil {
-		return nil,format, fmt.Errorf("error decoding carrier image: %v", err)
+		return nil, format, fmt.Errorf("error decoding carrier image: %v", err)
 	}
 
 	RGBAImage := image.NewRGBA(image.Rect(0, 0, img.Bounds().Dx(), img.Bounds().Dy()))
@@ -198,4 +197,3 @@ func getImageAsRGBA(reader io.Reader) (*image.RGBA, string, error) {
 
 	return RGBAImage, format, nil
 }
-

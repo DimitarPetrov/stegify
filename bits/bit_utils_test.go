@@ -47,11 +47,11 @@ func TestGetLastTwoBits(t *testing.T) {
 
 func TestConstructByteOfQuarters(t *testing.T) {
 	var tests = []struct {
-		first, second, third, fourth , result byte
+		first, second, third, fourth, result byte
 	}{
-		{byte(3), byte(2),byte(1),byte(3), byte(231)},
-		{byte(1), byte(1),byte(2),byte(2), byte(90)},
-		{byte(3), byte(2),byte(3),byte(3), byte(239)},
+		{byte(3), byte(2), byte(1), byte(3), byte(231)},
+		{byte(1), byte(1), byte(2), byte(2), byte(90)},
+		{byte(3), byte(2), byte(3), byte(3), byte(239)},
 	}
 
 	for _, test := range tests {
@@ -59,8 +59,8 @@ func TestConstructByteOfQuarters(t *testing.T) {
 			func(t *testing.T) {
 				if actual := ConstructByteOfQuarters(test.first, test.second, test.third, test.fourth); actual != test.result {
 					t.Errorf("Expected %08b (%d) but got %08b (%d)", test.result, test.result, actual, actual)
-			}
-		})
+				}
+			})
 	}
 
 }

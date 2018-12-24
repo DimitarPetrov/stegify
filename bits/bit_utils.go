@@ -29,7 +29,7 @@ func GetLastTwoBits(b byte) byte {
 
 //ConstructByteOfQuarters constructs a byte of it's four quarters given
 func ConstructByteOfQuarters(first, second, third, fourth byte) byte {
-	return (((first << 6) | (second << 4)) | third << 2) | fourth
+	return (((first << 6) | (second << 4)) | third<<2) | fourth
 }
 
 //ConstructByteOfQuartersAsSlice constructs a byte of it's four quarters given as byte slice

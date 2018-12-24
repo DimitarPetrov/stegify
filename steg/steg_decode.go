@@ -8,6 +8,8 @@ import (
 	"stegify/bits"
 )
 
+//Decode performs steganography decoding of data previously encoded by the Encode function.
+//The data is decoded from file carrier with name carrierFileName and it is saved in separate file named newFileName
 func Decode(carrierFileName string, newFileName string) error {
 	carrier, err := os.Open(carrierFileName)
 	defer carrier.Close()
@@ -32,9 +34,8 @@ func Decode(carrierFileName string, newFileName string) error {
 	for x := 0; x < dx && dataCount > 0; x++ {
 		for y := 0; y < dy && dataCount > 0; y++ {
 
-
 			if count >= dataSizeReservedBytes {
-				c := RGBAImage.RGBAAt(x,y)
+				c := RGBAImage.RGBAAt(x, y)
 				dataBytes = append(dataBytes, bits.GetLastTwoBits(c.R), bits.GetLastTwoBits(c.G), bits.GetLastTwoBits(c.B))
 				dataCount -= 3
 			}
@@ -45,19 +46,19 @@ func Decode(carrierFileName string, newFileName string) error {
 	}
 
 	if dataCount < 0 {
-		dataBytes = dataBytes[:len(dataBytes) + dataCount]
+		dataBytes = dataBytes[:len(dataBytes)+dataCount]
 	}
 
 	switch len(dataBytes) % 4 {
-		case 1 :
-			dataBytes = append(dataBytes, byte(0), byte(0), byte(0))
-		case 2 :
-			dataBytes = append(dataBytes, byte(0), byte(0))
-		case 3:
-			dataBytes = append(dataBytes, byte(0))
+	case 1:
+		dataBytes = append(dataBytes, byte(0), byte(0), byte(0))
+	case 2:
+		dataBytes = append(dataBytes, byte(0), byte(0))
+	case 3:
+		dataBytes = append(dataBytes, byte(0))
 	}
 
-	for i := 0; i < len(dataBytes); i+=4 {
+	for i := 0; i < len(dataBytes); i += 4 {
 		resultBytes = append(resultBytes, bits.ConstructByteOfQuartersAsSlice(dataBytes[i:i+4]))
 	}
 
@@ -79,29 +80,23 @@ func extractDataCount(RGBAImage *image.RGBA) int {
 	dy := RGBAImage.Bounds().Dy()
 
 	count := 0
-	hasMoreBytes := true
 
-	for x := 0; x < dx && hasMoreBytes; x++ {
-		for y := 0; y < dy && hasMoreBytes; y++ {
+	for x := 0; x < dx && count < dataSizeReservedBytes; x++ {
+		for y := 0; y < dy && count < dataSizeReservedBytes; y++ {
 
-			c := RGBAImage.RGBAAt(x,y)
-
-			if count < dataSizeReservedBytes {
-				dataCountBytes = append(dataCountBytes, bits.GetLastTwoBits(c.R), bits.GetLastTwoBits(c.G), bits.GetLastTwoBits(c.B))
-			} else {
-				hasMoreBytes = false
-			}
-
+			c := RGBAImage.RGBAAt(x, y)
+			dataCountBytes = append(dataCountBytes, bits.GetLastTwoBits(c.R), bits.GetLastTwoBits(c.G), bits.GetLastTwoBits(c.B))
 			count += 4
+
 		}
 	}
 
 	dataCountBytes = append(dataCountBytes, byte(0))
 
 	var bs = []byte{bits.ConstructByteOfQuartersAsSlice(dataCountBytes[:4]),
-						   bits.ConstructByteOfQuartersAsSlice(dataCountBytes[4:8]),
-						   bits.ConstructByteOfQuartersAsSlice(dataCountBytes[8:12]),
-						   bits.ConstructByteOfQuartersAsSlice(dataCountBytes[12:])}
+		bits.ConstructByteOfQuartersAsSlice(dataCountBytes[4:8]),
+		bits.ConstructByteOfQuartersAsSlice(dataCountBytes[8:12]),
+		bits.ConstructByteOfQuartersAsSlice(dataCountBytes[12:])}
 
 	return int(binary.LittleEndian.Uint32(bs))
 }
