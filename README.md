@@ -1,18 +1,18 @@
-#stegify
+# stegify
 [![GoDoc](https://godoc.org/github.com/DimitarPetrov/stegify?status.svg)](https://godoc.org/github.com/DimitarPetrov/stegify)
 [![Go Report Card](https://goreportcard.com/badge/github.com/DimitarPetrov/stegify)](https://goreportcard.com/report/github.com/DimitarPetrov/stegify)
 
-##Overview
+## Overview
 `stegify` is a simple command line tool that is capable of fully transparent hiding files within an image.
 The technique is known as [steganography](https://en.wikipedia.org/wiki/steganography). This tool uses
 the technique known as LSB (Least Significant Bit) Steganography. 
 
-##Install
+## Install
 ```
 go get github.com/DimitarPetrov/stegify
 ```
 
-##Usage
+## Usage
 
 ```
 stegify -op encode -carrier <file-name> -data <file-name> -result <file-name>
