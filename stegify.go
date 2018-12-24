@@ -1,3 +1,4 @@
+//Command line tool capable of steganography encoding and decoding any file in given image as carrier
 package main
 
 import (
