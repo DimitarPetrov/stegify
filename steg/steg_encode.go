@@ -15,7 +15,7 @@ import (
 const dataSizeHeaderReservedBytes = 20 // 20 bytes results in 30 usable bits
 
 //Encode performs steganography encoding of data file in carrier file
-//and saves the steganogrphy encoded product in new file.
+//and saves the steganography encoded product in new file.
 //For now there are some limitations for carrier, it could be only png image format.
 //There aren't any limitations for data file format
 func Encode(carrierFileName string, dataFileName string, newFileName string) error {
@@ -36,7 +36,7 @@ func Encode(carrierFileName string, dataFileName string, newFileName string) err
 		return fmt.Errorf("error opening data file: %v", err)
 	}
 
-	dataBytes := make(chan byte)
+	dataBytes := make(chan byte, 128)
 	errChan := make(chan error)
 
 	go readData(dataFile, dataBytes, errChan)
