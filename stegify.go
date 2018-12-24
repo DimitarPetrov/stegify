@@ -11,7 +11,7 @@ import (
 var operation = flag.String("op", "", "operation (one of the following: encode, decode)")
 var carrierFile = flag.String("carrier", "", "carrier file in which the data is encoded")
 var dataFile = flag.String("data", "", "data file which is being encoded in carrier")
-var resultFile = flag.String("result", "result", "result file of operation (with carrier's file extension when encoding")
+var resultFile = flag.String("result", "result", "result file of operation (with carrier's file extension when encoding)")
 
 func main() {
 	flag.Parse()
@@ -43,7 +43,7 @@ func main() {
 			fmt.Fprintln(os.Stderr, err)
 		}
 	default:
-		fmt.Fprintf(os.Stderr, "Unsupported operation: %q", os.Args[1])
+		fmt.Fprintf(os.Stderr, "Unsupported operation: %q", *operation)
 	}
 
 }

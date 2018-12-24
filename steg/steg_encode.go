@@ -6,8 +6,8 @@ import (
 	"github.com/DimitarPetrov/stegify/bits"
 	"image"
 	"image/draw"
-	"image/png"
 	_ "image/jpeg" //register jpeg image format
+	"image/png"
 	"io"
 	"os"
 	"strings"
@@ -103,7 +103,6 @@ func Encode(carrierFileName string, dataFileName string, newFileName string) err
 	switch format {
 	case "png", "jpeg":
 		png.Encode(resultFile, RGBAImage)
-	//case "gif" : gif.Encode(resultFile, RGBAImage, nil)
 	default:
 		return fmt.Errorf("unsupported carrier format")
 	}
