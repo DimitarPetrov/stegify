@@ -19,7 +19,7 @@ import (
 
 const dataSizeReservedBytes = 20
 
-func Encode(carrierFileName string, dataFileName string) error {
+func Encode(carrierFileName string, dataFileName string, newFileName string) error {
 	carrier, err := os.Open(carrierFileName)
 	defer carrier.Close()
 	if err != nil {
@@ -77,6 +77,7 @@ func Encode(carrierFileName string, dataFileName string) error {
 				if hasMoreBytes {
 					dataCount++
 				}
+				RGBAImage.SetRGBA(x,y,c)
 			}
 			count += 4
 		}
@@ -93,7 +94,7 @@ func Encode(carrierFileName string, dataFileName string) error {
 
 	setDataSizeHeader(RGBAImage, bytesOf(dataCount))
 
-	resultFile, err := os.Create("steg_result" + carrierFileName[strings.LastIndex(carrierFileName, "."):])
+	resultFile, err := os.Create(newFileName + carrierFileName[strings.LastIndex(carrierFileName, "."):])
 	defer resultFile.Close()
 	if err != nil {
 		return fmt.Errorf("error creating result file: %v", err)
@@ -142,7 +143,7 @@ func setDataSizeHeader(RGBAImage *image.RGBA, dataCountBytes []byte) {
 			c.R = bits.SetLastTwoBits(c.R, dataCountBytes[count])
 			c.G = bits.SetLastTwoBits(c.G, dataCountBytes[count+1])
 			c.B = bits.SetLastTwoBits(c.B, dataCountBytes[count+2])
-
+			RGBAImage.SetRGBA(x,y,c)
 
 			count += 3
 

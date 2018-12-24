@@ -31,3 +31,8 @@ func GetLastTwoBits(b byte) byte {
 func ConstructByteOfQuarters(first, second, third, fourth byte) byte {
 	return (((first << 6) | (second << 4)) | third << 2) | fourth
 }
+
+//ConstructByteOfQuartersAsSlice constructs a byte of it's four quarters given as byte slice
+func ConstructByteOfQuartersAsSlice(b []byte) byte {
+	return ConstructByteOfQuarters(b[0], b[1], b[2], b[3])
+}

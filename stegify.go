@@ -6,5 +6,6 @@ import (
 )
 
 func main() {
-	fmt.Println(steg.Encode("test.jpeg", "test.png"))
+	fmt.Println(steg.Encode("test.png", "test.jpeg", "steg_result"))
+	fmt.Println(steg.Decode("steg_result.png", "asd"))
 }
