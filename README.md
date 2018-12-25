@@ -9,20 +9,25 @@ the technique known as LSB (Least Significant Bit) Steganography.
 
 ## Install
 ```
-go get github.com/DimitarPetrov/stegify
+$ go get github.com/DimitarPetrov/stegify
 ```
 
 ## Usage
 
 ```
-stegify -op encode -carrier <file-name> -data <file-name> -result <file-name>
-stegify -op decode -carrier <file-name> -result <file-name>
+$ stegify -op encode -carrier <file-name> -data <file-name> -result <file-name>
+$ stegify -op decode -carrier <file-name> -result <file-name>
 ```
-When encoding, the file with name given to flag `-data` is hidden inside file with name given to flag
-`-carrier` and the resulting file is saved new file in the current working directory under the
-name given to flag `-result`.
+When encoding, the file with name given to flag `-data` is hidden inside the file with name given to flag
+`-carrier` and the resulting file is saved in new file in the current working directory under the
+name given to flag `-result`. The file extension of result file is inherited from the carrier file and must not be specified
+explicitly in the `-result` flag.
 
 When decoding, given a file name of a carrier file with previously encoded data in it, the data is extracted
-and saved in new file under the name given to flag `-result` in current working directory.
+and saved in new file in the current working directory under the name given to flag `-result`.
+The result file won't have any file extension and therefore it should be specified explicitly in `-result` flag.
 
 In both cases the flag `-result` could be omitted and it will be used the default file name: `result`
+
+Disclaimer: If carrier file is in jpeg format, after encoding the result file image will be png encoded despite of file
+extension inherited from the original carrier file (which is .jpeg).
