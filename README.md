@@ -7,11 +7,6 @@
 The technique is known as [steganography](https://en.wikipedia.org/wiki/steganography). This tool uses
 the technique known as LSB (Least Significant Bit) Steganography. 
 
-## Install
-```
-$ go get github.com/DimitarPetrov/stegify
-```
-
 ## Demonstration
 
 | Carrier                                | Data                                | Result                                               |
@@ -19,6 +14,11 @@ $ go get github.com/DimitarPetrov/stegify
 | ![Original File](examples/street.jpeg) | ![Encoded File](examples/lake.jpeg) | ![Encoded File](examples/benchmark_test_decode.jpeg) |
 
 The `Result` file contains the `Data` file hidden in it. And as you can see it is fully transparent.
+
+## Install
+```
+$ go get github.com/DimitarPetrov/stegify
+```
 
 ## Usage
 
