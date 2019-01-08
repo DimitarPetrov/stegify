@@ -12,6 +12,14 @@ the technique known as LSB (Least Significant Bit) Steganography.
 $ go get github.com/DimitarPetrov/stegify
 ```
 
+## Demonstration
+
+| Carrier                                | Data                                | Result                                               |
+| ---------------------------------------| ------------------------------------|------------------------------------------------------|
+| ![Original File](examples/street.jpeg) | ![Encoded File](examples/lake.jpeg) | ![Encoded File](examples/benchmark_test_decode.jpeg) |
+
+The `Result` file contains the `Data` file hidden in it. And as you can see it is fully transparent.
+
 ## Usage
 
 ```
@@ -29,5 +37,7 @@ The result file won't have any file extension and therefore it should be specifi
 
 In both cases the flag `-result` could be omitted and it will be used the default file name: `result`
 
-Disclaimer: If carrier file is in jpeg format, after encoding the result file image will be png encoded despite of file
-extension inherited from the original carrier file (which is .jpeg).
+## Disclaimer
+
+If carrier file is in jpeg or jpg format, after encoding the result file image will be png encoded (therefore it may be bigger in size)
+despite of file extension inherited from the original carrier file (which is .jpeg or .jpg).
