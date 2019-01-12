@@ -1,6 +1,7 @@
 # stegify
 [![GoDoc](https://godoc.org/github.com/DimitarPetrov/stegify?status.svg)](https://godoc.org/github.com/DimitarPetrov/stegify)
 [![Go Report Card](https://goreportcard.com/badge/github.com/DimitarPetrov/stegify)](https://goreportcard.com/report/github.com/DimitarPetrov/stegify)
+[![cover.run](https://cover.run/go/github.com/DimitarPetrov/stegify.svg?style=flat&tag=golang-1.10)](https://cover.run/go?tag=golang-1.10&repo=github.com%2FDimitarPetrov%2Fstegify)
 
 ## Overview
 `stegify` is a simple command line tool that is capable of fully transparent hiding files within an image.
