@@ -63,3 +63,24 @@ func TestDecode(t *testing.T) {
 	}
 
 }
+
+func TestDecodeShouldReturnErrorWhenCarrierFileMissing(t *testing.T) {
+
+	err := Decode("not_existing_file", "result")
+	if err == nil {
+		os.Remove("result")
+		t.FailNow()
+	}
+	t.Log(err)
+
+}
+
+func TestDecodeShouldReturnErrorWhenCarrierFileIsNotImage(t *testing.T) {
+
+	err := Decode("../README.md", "result")
+	if err == nil {
+		t.FailNow()
+	}
+	t.Log(err)
+
+}

@@ -67,3 +67,45 @@ func TestEncode(t *testing.T) {
 		t.Error("Assertion failed!")
 	}
 }
+
+func TestEncodeShouldReturnErrorWhenCarrierFileMissing(t *testing.T) {
+
+	err := Encode("not_existing_file", "../examples/lake.jpeg", "encoded_result")
+	if err == nil {
+		os.Remove("encoded_result.jpeg")
+		t.FailNow()
+	}
+	t.Log(err)
+
+}
+
+func TestEncodeShouldReturnErrorWhenCarrierFileIsNotImage(t *testing.T) {
+
+	err := Encode("../README.md", "../examples/lake.jpeg", "encoded_result")
+	if err == nil {
+		t.FailNow()
+	}
+	t.Log(err)
+
+}
+
+func TestEncodeShouldReturnErrorWhenDataFileMissing(t *testing.T) {
+
+	err := Encode("../examples/street.jpeg", "not_existing_file", "encoded_result")
+	if err == nil {
+		os.Remove("encoded_result.jpeg")
+		t.FailNow()
+	}
+	t.Log(err)
+
+}
+
+func TestEncodeShouldReturnErrorWhenDataFileTooLarge(t *testing.T) {
+
+	err := Encode("../examples/lake.jpeg", "../examples/test_decode.jpeg", "encoded_result")
+	if err == nil {
+		os.Remove("encoded_result.jpeg")
+		t.FailNow()
+	}
+	t.Log(err)
+}

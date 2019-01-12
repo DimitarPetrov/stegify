@@ -64,3 +64,43 @@ func TestConstructByteOfQuarters(t *testing.T) {
 	}
 
 }
+
+func TestQuartersOfByte(t *testing.T) {
+	var tests = []struct {
+		input  byte
+		result [4]byte
+	}{
+		{231, [4]byte{3, 2, 1, 3}},
+		{90, [4]byte{1, 1, 2, 2}},
+		{239, [4]byte{3, 2, 3, 3}},
+	}
+
+	for _, test := range tests {
+		t.Run(fmt.Sprintf("QuartersOfByte(%08b)", test.input), func(t *testing.T) {
+			if actual := QuartersOfByte(test.input); actual != test.result {
+				t.Errorf("Expected %08b (%d) but got %08b (%d)", test.result, test.result, actual, actual)
+			}
+		})
+	}
+}
+
+func TestConstructByteOfQuartersAsSlice(t *testing.T) {
+	var tests = []struct {
+		input  []byte
+		result byte
+	}{
+		{[]byte{3, 2, 1, 3}, byte(231)},
+		{[]byte{1, 1, 2, 2}, byte(90)},
+		{[]byte{3, 2, 3, 3}, byte(239)},
+	}
+
+	for _, test := range tests {
+		t.Run(fmt.Sprintf("ConstructByteOfQuartersAsSlice(%08b)", test.input),
+			func(t *testing.T) {
+				if actual := ConstructByteOfQuartersAsSlice(test.input); actual != test.result {
+					t.Errorf("Expected %08b (%d) but got %08b (%d)", test.result, test.result, actual, actual)
+				}
+			})
+	}
+
+}
