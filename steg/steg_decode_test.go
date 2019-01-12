@@ -1,6 +1,8 @@
 package steg
 
 import (
+	"bytes"
+	"io/ioutil"
 	"os"
 	"testing"
 )
@@ -8,8 +10,56 @@ import (
 func BenchmarkDecode(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
-		Decode("../examples/benchmark_test_decode.jpeg", "benchmark_result")
+		err := Decode("../examples/test_decode.jpeg", "benchmark_result")
+		if err != nil {
+			b.Fatalf("Error decoding file: %v", err)
+		}
 	}
 
-	os.Remove("benchmark_result")
+	err := os.Remove("benchmark_result")
+	if err != nil {
+		b.Fatalf("Error removing benchmark_result file: %v", err)
+	}
+}
+
+func TestDecode(t *testing.T) {
+
+	err := Decode("../examples/test_decode.jpeg", "result")
+	if err != nil {
+		t.Fatalf("Error decoding file: %v", err)
+	}
+
+	defer func() {
+		err = os.Remove("result")
+		if err != nil {
+			t.Fatalf("Error removing result file: %v", err)
+		}
+	}()
+
+	wanted, err := os.Open("../examples/lake.jpeg")
+	if err != nil {
+		t.Fatalf("Error opening file examples/lake.jpg: %v", err)
+	}
+	defer wanted.Close()
+
+	result, err := os.Open("result")
+	if err != nil {
+		t.Fatalf("Error opening file result: %v", err)
+	}
+	defer result.Close()
+
+	wantedBytes, err := ioutil.ReadAll(wanted)
+	if err != nil {
+		t.Fatalf("Error reading file examples/lake.jpg: %v", err)
+	}
+
+	resultBytes, err := ioutil.ReadAll(result)
+	if err != nil {
+		t.Fatalf("Error reading file result: %v", err)
+	}
+
+	if !bytes.Equal(wantedBytes, resultBytes) {
+		t.Error("Assertion failed!")
+	}
+
 }

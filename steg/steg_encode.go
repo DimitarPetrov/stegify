@@ -154,10 +154,9 @@ func setColorSegment(colorSegment *byte, data <-chan byte, errChan <-chan error)
 	case byte, ok := <-data:
 		if !ok {
 			return false, nil
-		} else {
-			*colorSegment = bits.SetLastTwoBits(*colorSegment, byte)
-			return true, nil
 		}
+		*colorSegment = bits.SetLastTwoBits(*colorSegment, byte)
+		return true, nil
 
 	case err := <-errChan:
 		return false, err
@@ -175,11 +174,11 @@ func readData(reader io.Reader, bytes chan<- byte, errChan chan<- error) {
 			}
 			errChan <- fmt.Errorf("error reading data %v", err)
 			return
-		} else {
-			for _, byte := range bits.QuartersOfByte(byte[0]) {
-				bytes <- byte
-			}
 		}
+		for _, byte := range bits.QuartersOfByte(byte[0]) {
+			bytes <- byte
+		}
+
 	}
 	close(bytes)
 }

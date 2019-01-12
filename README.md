@@ -11,7 +11,7 @@ the technique known as LSB (Least Significant Bit) Steganography.
 
 | Carrier                                | Data                                | Result                                               |
 | ---------------------------------------| ------------------------------------|------------------------------------------------------|
-| ![Original File](examples/street.jpeg) | ![Encoded File](examples/lake.jpeg) | ![Encoded File](examples/benchmark_test_decode.jpeg) |
+| ![Original File](examples/street.jpeg) | ![Encoded File](examples/lake.jpeg) | ![Encoded File](examples/test_decode.jpeg) |
 
 The `Result` file contains the `Data` file hidden in it. And as you can see it is fully transparent.
 
