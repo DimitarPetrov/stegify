@@ -49,7 +49,7 @@ func Decode(carrierFileName string, newFileName string) error {
 		dataBytes = dataBytes[:len(dataBytes)+dataCount] //remove bytes that are not part of data and mistakenly added
 	}
 
-	align(dataBytes) // len(dataBytes) must be aliquot of 4
+	dataBytes = align(dataBytes) // len(dataBytes) must be aliquot of 4
 
 	for i := 0; i < len(dataBytes); i += 4 {
 		resultBytes = append(resultBytes, bits.ConstructByteOfQuartersAsSlice(dataBytes[i:i+4]))
@@ -66,7 +66,7 @@ func Decode(carrierFileName string, newFileName string) error {
 	return nil
 }
 
-func align(dataBytes []byte) {
+func align(dataBytes []byte) []byte {
 	switch len(dataBytes) % 4 {
 	case 1:
 		dataBytes = append(dataBytes, byte(0), byte(0), byte(0))
@@ -75,6 +75,7 @@ func align(dataBytes []byte) {
 	case 3:
 		dataBytes = append(dataBytes, byte(0))
 	}
+	return dataBytes
 }
 
 func extractDataCount(RGBAImage *image.RGBA) int {
