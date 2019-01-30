@@ -5,17 +5,12 @@ import (
 	"fmt"
 	"github.com/DimitarPetrov/stegify/bits"
 	"image"
+	"io"
 	"os"
 )
 
-//Decode performs steganography decoding of data previously encoded by the Encode function.
-//The data is decoded from file carrier and it is saved in separate new file
-func Decode(carrierFileName string, newFileName string) error {
-	carrier, err := os.Open(carrierFileName)
-	defer carrier.Close()
-	if err != nil {
-		return fmt.Errorf("error opening carrier file: %v", err)
-	}
+//Decode performs steganography decoding of Reader with previously encoded data by the Encode function and writes to result Writer.
+func Decode(carrier io.Reader, result io.Writer) error {
 
 	RGBAImage, _, err := getImageAsRGBA(carrier)
 	if err != nil {
@@ -55,15 +50,33 @@ func Decode(carrierFileName string, newFileName string) error {
 		resultBytes = append(resultBytes, bits.ConstructByteOfQuartersAsSlice(dataBytes[i:i+4]))
 	}
 
-	resultFile, err := os.Create(newFileName)
-	defer resultFile.Close()
+	result.Write(resultBytes)
+
+	return nil
+}
+
+//DecodeByFileNames performs steganography decoding of data previously encoded by the Encode function.
+//The data is decoded from file carrier and it is saved in separate new file
+func DecodeByFileNames(carrierFileName string, newFileName string) error {
+	carrier, err := os.Open(carrierFileName)
+	defer carrier.Close()
+	if err != nil {
+		return fmt.Errorf("error opening carrier file: %v", err)
+	}
+
+	result, err := os.Create(newFileName)
+	defer result.Close()
 	if err != nil {
 		return fmt.Errorf("error creating result file: %v", err)
 	}
 
-	resultFile.Write(resultBytes)
+	err = Decode(carrier, result)
+	if err != nil {
+		os.Remove(newFileName)
+	}
 
-	return nil
+	return err
+
 }
 
 func align(dataBytes []byte) []byte {

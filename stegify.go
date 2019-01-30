@@ -33,12 +33,12 @@ func main() {
 
 	switch *operation {
 	case "encode":
-		err := steg.Encode(*carrierFile, *dataFile, *resultFile)
+		err := steg.EncodeByFileNames(*carrierFile, *dataFile, *resultFile)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 		}
 	case "decode":
-		err := steg.Decode(*carrierFile, *resultFile)
+		err := steg.DecodeByFileNames(*carrierFile, *resultFile)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 		}

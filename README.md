@@ -6,9 +6,8 @@
 
 
 ## Overview
-`stegify` is a simple command line tool that is capable of fully transparent hiding files within an image.
-The technique is known as [steganography](https://en.wikipedia.org/wiki/steganography). This tool uses
-the technique known as LSB (Least Significant Bit) Steganography. 
+`stegify` is a simple command line tool capable of fully transparent hiding any file within an image.
+This technique is known as LSB (Least Significant Bit) [steganography](https://en.wikipedia.org/wiki/steganography) 
 
 ## Demonstration
 
@@ -20,11 +19,12 @@ The `Result` file contains the `Data` file hidden in it. And as you can see it i
 
 ## Install
 ```
-$ go get github.com/DimitarPetrov/stegify
+$ go get -u github.com/DimitarPetrov/stegify
 ```
 
 ## Usage
 
+### As a command line tool
 ```
 $ stegify -op encode -carrier <file-name> -data <file-name> -result <file-name>
 $ stegify -op decode -carrier <file-name> -result <file-name>
@@ -39,6 +39,12 @@ and saved in new file in the current working directory under the name given to f
 The result file won't have any file extension and therefore it should be specified explicitly in `-result` flag.
 
 In both cases the flag `-result` could be omitted and it will be used the default file name: `result`
+
+### Programmatically in your code
+
+`stegify` can be used programmatically too and it provides easy to use functions working with file names
+or raw Readers and Writers. You can visit [godoc](https://godoc.org/github.com/DimitarPetrov/stegify) under
+`steg` package for details.
 
 ## Disclaimer
 

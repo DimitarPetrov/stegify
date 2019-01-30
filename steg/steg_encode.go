@@ -15,30 +15,19 @@ import (
 
 const dataSizeHeaderReservedBytes = 20 // 20 bytes results in 30 usable bits
 
-//Encode performs steganography encoding of data file in carrier file
-//and saves the steganography encoded product in new file.
-func Encode(carrierFileName string, dataFileName string, newFileName string) error {
-	carrier, err := os.Open(carrierFileName)
-	defer carrier.Close()
-	if err != nil {
-		return fmt.Errorf("error opening carrier file: %v", err)
-	}
+//Encode performs steganography encoding of data Reader in carrier
+//and writes it to the result Writer encoded as PNG image.
+func Encode(carrier io.Reader, data io.Reader, result io.Writer) error {
 
 	RGBAImage, format, err := getImageAsRGBA(carrier)
 	if err != nil {
 		return fmt.Errorf("error parsing carrier image: %v", err)
 	}
 
-	dataFile, err := os.Open(dataFileName)
-	defer dataFile.Close()
-	if err != nil {
-		return fmt.Errorf("error opening data file: %v", err)
-	}
-
 	dataBytes := make(chan byte, 128)
 	errChan := make(chan error)
 
-	go readData(dataFile, dataBytes, errChan)
+	go readData(data, dataBytes, errChan)
 
 	dx := RGBAImage.Bounds().Dx()
 	dy := RGBAImage.Bounds().Dy()
@@ -94,20 +83,44 @@ func Encode(carrierFileName string, dataFileName string, newFileName string) err
 
 	setDataSizeHeader(RGBAImage, quartersOfBytesOf(dataCount))
 
-	resultFile, err := os.Create(newFileName + carrierFileName[strings.LastIndex(carrierFileName, "."):])
-	defer resultFile.Close()
-	if err != nil {
-		return fmt.Errorf("error creating result file: %v", err)
-	}
-
 	switch format {
 	case "png", "jpeg":
-		png.Encode(resultFile, RGBAImage)
+		png.Encode(result, RGBAImage)
 	default:
 		return fmt.Errorf("unsupported carrier format")
 	}
 
 	return nil
+}
+
+//EncodeByFileNames performs steganography encoding of data file in carrier file
+//and saves the steganography encoded product in new file.
+func EncodeByFileNames(carrierFileName, dataFileName, resultFileName string) error {
+
+	carrier, err := os.Open(carrierFileName)
+	defer carrier.Close()
+	if err != nil {
+		return fmt.Errorf("error opening carrier file: %v", err)
+	}
+
+	data, err := os.Open(dataFileName)
+	defer data.Close()
+	if err != nil {
+		return fmt.Errorf("error opening data file: %v", err)
+	}
+
+	resultFileWithExtension := resultFileName + carrierFileName[strings.LastIndex(carrierFileName, "."):]
+	result, err := os.Create(resultFileWithExtension)
+	defer result.Close()
+	if err != nil {
+		return fmt.Errorf("error creating result file: %v", err)
+	}
+
+	err = Encode(carrier, data, result)
+	if err != nil {
+		os.Remove(resultFileWithExtension)
+	}
+	return err
 }
 
 func quartersOfBytesOf(counter uint32) []byte {
