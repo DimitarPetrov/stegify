@@ -26,7 +26,6 @@ func BenchmarkDecode(b *testing.B) {
 }
 
 func BenchmarkDecodeByFileNames(b *testing.B) {
-
 	for i := 0; i < b.N; i++ {
 		err := DecodeByFileNames("../examples/test_decode.jpeg", "benchmark_result")
 		if err != nil {
@@ -41,7 +40,6 @@ func BenchmarkDecodeByFileNames(b *testing.B) {
 }
 
 func TestDecode(t *testing.T) {
-
 	carrier, err := os.Open("../examples/test_decode.jpeg")
 	if err != nil {
 		t.Fatalf("Error opening carrier file: %v", err)
@@ -77,7 +75,6 @@ func TestDecode(t *testing.T) {
 }
 
 func TestDecodeByFileNames(t *testing.T) {
-
 	err := DecodeByFileNames("../examples/test_decode.jpeg", "result")
 	if err != nil {
 		t.Fatalf("Error decoding file: %v", err)
@@ -119,7 +116,6 @@ func TestDecodeByFileNames(t *testing.T) {
 }
 
 func TestDecodeByFileNamesShouldReturnErrorWhenCarrierFileMissing(t *testing.T) {
-
 	err := DecodeByFileNames("not_existing_file", "result")
 	if err == nil {
 		os.Remove("result")

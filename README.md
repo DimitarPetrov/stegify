@@ -26,13 +26,13 @@ $ go get -u github.com/DimitarPetrov/stegify
 
 ### As a command line tool
 ```
-$ stegify -op encode -carrier <file-name> -data <file-name> -result <file-name>
-$ stegify -op decode -carrier <file-name> -result <file-name>
+$ stegify encode -carrier <file-name> -data <file-name> -result <file-name>
+$ stegify decode -carrier <file-name> -result <file-name>
 ```
 When encoding, the file with name given to flag `-data` is hidden inside the file with name given to flag
 `-carrier` and the resulting file is saved in new file in the current working directory under the
-name given to flag `-result`. The file extension of result file is inherited from the carrier file and must not be specified
-explicitly in the `-result` flag.
+name given to flag `-result`.
+The result file won't have any file extension and therefore it should be specified explicitly in `-result` flag. 
 
 When decoding, given a file name of a carrier file with previously encoded data in it, the data is extracted
 and saved in new file in the current working directory under the name given to flag `-result`.
@@ -49,4 +49,4 @@ or raw Readers and Writers. You can visit [godoc](https://godoc.org/github.com/D
 ## Disclaimer
 
 If carrier file is in jpeg or jpg format, after encoding the result file image will be png encoded (therefore it may be bigger in size)
-despite of file extension inherited from the original carrier file (which is .jpeg or .jpg).
+despite of file extension specified in the result flag.

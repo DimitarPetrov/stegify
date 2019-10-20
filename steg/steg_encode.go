@@ -10,7 +10,6 @@ import (
 	"image/png"
 	"io"
 	"os"
-	"strings"
 )
 
 const dataSizeHeaderReservedBytes = 20 // 20 bytes results in 30 usable bits
@@ -18,7 +17,6 @@ const dataSizeHeaderReservedBytes = 20 // 20 bytes results in 30 usable bits
 //Encode performs steganography encoding of data Reader in carrier
 //and writes it to the result Writer encoded as PNG image.
 func Encode(carrier io.Reader, data io.Reader, result io.Writer) error {
-
 	RGBAImage, format, err := getImageAsRGBA(carrier)
 	if err != nil {
 		return fmt.Errorf("error parsing carrier image: %v", err)
@@ -39,11 +37,8 @@ func Encode(carrier io.Reader, data io.Reader, result io.Writer) error {
 
 	for x := 0; x < dx && hasMoreBytes; x++ {
 		for y := 0; y < dy && hasMoreBytes; y++ {
-
 			if count >= dataSizeHeaderReservedBytes {
-
 				c := RGBAImage.RGBAAt(x, y)
-
 				hasMoreBytes, err = setColorSegment(&c.R, dataBytes, errChan)
 				if err != nil {
 					return err
@@ -78,47 +73,57 @@ func Encode(carrier io.Reader, data io.Reader, result io.Writer) error {
 			return fmt.Errorf("data file too large for this carrier")
 		}
 	default:
-
 	}
 
 	setDataSizeHeader(RGBAImage, quartersOfBytesOf(dataCount))
 
 	switch format {
 	case "png", "jpeg":
-		png.Encode(result, RGBAImage)
+		return png.Encode(result, RGBAImage)
 	default:
 		return fmt.Errorf("unsupported carrier format")
 	}
-
-	return nil
 }
 
 //EncodeByFileNames performs steganography encoding of data file in carrier file
 //and saves the steganography encoded product in new file.
-func EncodeByFileNames(carrierFileName, dataFileName, resultFileName string) error {
-
+func EncodeByFileNames(carrierFileName, dataFileName, resultFileName string) (err error) {
 	carrier, err := os.Open(carrierFileName)
-	defer carrier.Close()
 	if err != nil {
 		return fmt.Errorf("error opening carrier file: %v", err)
 	}
+	defer func() {
+		closeErr := carrier.Close()
+		if err == nil {
+			err = closeErr
+		}
+	}()
 
 	data, err := os.Open(dataFileName)
-	defer data.Close()
 	if err != nil {
 		return fmt.Errorf("error opening data file: %v", err)
 	}
+	defer func() {
+		closeErr := data.Close()
+		if err == nil {
+			err = closeErr
+		}
+	}()
 
-	resultFileWithExtension := resultFileName + carrierFileName[strings.LastIndex(carrierFileName, "."):]
-	result, err := os.Create(resultFileWithExtension)
-	defer result.Close()
+	result, err := os.Create(resultFileName)
 	if err != nil {
 		return fmt.Errorf("error creating result file: %v", err)
 	}
+	defer func() {
+		closeErr := result.Close()
+		if err == nil {
+			err = closeErr
+		}
+	}()
 
 	err = Encode(carrier, data, result)
 	if err != nil {
-		os.Remove(resultFileWithExtension)
+		_ = os.Remove(resultFileName)
 	}
 	return err
 }
@@ -139,7 +144,6 @@ func quartersOfBytesOf(counter uint32) []byte {
 }
 
 func setDataSizeHeader(RGBAImage *image.RGBA, dataCountBytes []byte) {
-
 	dx := RGBAImage.Bounds().Dx()
 	dy := RGBAImage.Bounds().Dy()
 
@@ -147,7 +151,6 @@ func setDataSizeHeader(RGBAImage *image.RGBA, dataCountBytes []byte) {
 
 	for x := 0; x < dx && count < (dataSizeHeaderReservedBytes/4)*3; x++ {
 		for y := 0; y < dy && count < (dataSizeHeaderReservedBytes/4)*3; y++ {
-
 			c := RGBAImage.RGBAAt(x, y)
 			c.R = bits.SetLastTwoBits(c.R, dataCountBytes[count])
 			c.G = bits.SetLastTwoBits(c.G, dataCountBytes[count+1])
@@ -162,7 +165,6 @@ func setDataSizeHeader(RGBAImage *image.RGBA, dataCountBytes []byte) {
 }
 
 func setColorSegment(colorSegment *byte, data <-chan byte, errChan <-chan error) (hasMoreBytes bool, err error) {
-
 	select {
 	case byte, ok := <-data:
 		if !ok {
@@ -175,21 +177,20 @@ func setColorSegment(colorSegment *byte, data <-chan byte, errChan <-chan error)
 		return false, err
 
 	}
-
 }
 
 func readData(reader io.Reader, bytes chan<- byte, errChan chan<- error) {
-	byte := make([]byte, 1)
+	b := make([]byte, 1)
 	for {
-		if _, err := reader.Read(byte); err != nil {
+		if _, err := reader.Read(b); err != nil {
 			if err == io.EOF {
 				break
 			}
 			errChan <- fmt.Errorf("error reading data %v", err)
 			return
 		}
-		for _, byte := range bits.QuartersOfByte(byte[0]) {
-			bytes <- byte
+		for _, b := range bits.QuartersOfByte(b[0]) {
+			bytes <- b
 		}
 
 	}
@@ -197,7 +198,6 @@ func readData(reader io.Reader, bytes chan<- byte, errChan chan<- error) {
 }
 
 func getImageAsRGBA(reader io.Reader) (*image.RGBA, string, error) {
-
 	img, format, err := image.Decode(reader)
 	if err != nil {
 		return nil, format, fmt.Errorf("error decoding carrier image: %v", err)

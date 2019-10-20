@@ -31,9 +31,8 @@ func BenchmarkEncode(b *testing.B) {
 }
 
 func BenchmarkEncodeByFileNames(b *testing.B) {
-
 	for i := 0; i < b.N; i++ {
-		err := EncodeByFileNames("../examples/street.jpeg", "../examples/lake.jpeg", "benchmark_result")
+		err := EncodeByFileNames("../examples/street.jpeg", "../examples/lake.jpeg", "benchmark_result.jpeg")
 		if err != nil {
 			b.Fatalf("Error encoding file: %v", err)
 		}
@@ -46,7 +45,6 @@ func BenchmarkEncodeByFileNames(b *testing.B) {
 }
 
 func TestEncode(t *testing.T) {
-
 	carrier, err := os.Open("../examples/street.jpeg")
 	if err != nil {
 		t.Fatalf("Error opening carrier file: %v", err)
@@ -93,8 +91,7 @@ func TestEncode(t *testing.T) {
 }
 
 func TestEncodeByFileNames(t *testing.T) {
-
-	err := EncodeByFileNames("../examples/street.jpeg", "../examples/lake.jpeg", "encoded_result")
+	err := EncodeByFileNames("../examples/street.jpeg", "../examples/lake.jpeg", "encoded_result.jpeg")
 	if err != nil {
 		t.Fatalf("Error encoding file: %v", err)
 	}
@@ -145,18 +142,15 @@ func TestEncodeByFileNames(t *testing.T) {
 }
 
 func TestEncodeShouldReturnErrorWhenCarrierFileMissing(t *testing.T) {
-
-	err := EncodeByFileNames("not_existing_file", "../examples/lake.jpeg", "encoded_result")
+	err := EncodeByFileNames("not_existing_file", "../examples/lake.jpeg", "encoded_result.jpeg")
 	if err == nil {
 		os.Remove("encoded_result.jpeg")
 		t.FailNow()
 	}
 	t.Log(err)
-
 }
 
 func TestEncodeShouldReturnErrorWhenCarrierFileIsNotImage(t *testing.T) {
-
 	carrier, err := os.Open("../README.md")
 	if err != nil {
 		t.Fatalf("Error opening carrier file: %v", err)
@@ -175,18 +169,15 @@ func TestEncodeShouldReturnErrorWhenCarrierFileIsNotImage(t *testing.T) {
 		t.FailNow()
 	}
 	t.Log(err)
-
 }
 
 func TestEncodeByFileNamesShouldReturnErrorWhenDataFileMissing(t *testing.T) {
-
-	err := EncodeByFileNames("../examples/street.jpeg", "not_existing_file", "encoded_result")
+	err := EncodeByFileNames("../examples/street.jpeg", "not_existing_file", "encoded_result.jpeg")
 	if err == nil {
 		os.Remove("encoded_result.jpeg")
 		t.FailNow()
 	}
 	t.Log(err)
-
 }
 
 func TestEncodeShouldReturnErrorWhenDataFileTooLarge(t *testing.T) {

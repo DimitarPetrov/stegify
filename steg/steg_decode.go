@@ -11,7 +11,6 @@ import (
 
 //Decode performs steganography decoding of Reader with previously encoded data by the Encode function and writes to result Writer.
 func Decode(carrier io.Reader, result io.Writer) error {
-
 	RGBAImage, _, err := getImageAsRGBA(carrier)
 	if err != nil {
 		return fmt.Errorf("error parsing carrier image: %v", err)
@@ -29,7 +28,6 @@ func Decode(carrier io.Reader, result io.Writer) error {
 
 	for x := 0; x < dx && dataCount > 0; x++ {
 		for y := 0; y < dy && dataCount > 0; y++ {
-
 			if count >= dataSizeHeaderReservedBytes {
 				c := RGBAImage.RGBAAt(x, y)
 				dataBytes = append(dataBytes, bits.GetLastTwoBits(c.R), bits.GetLastTwoBits(c.G), bits.GetLastTwoBits(c.B))
@@ -50,33 +48,43 @@ func Decode(carrier io.Reader, result io.Writer) error {
 		resultBytes = append(resultBytes, bits.ConstructByteOfQuartersAsSlice(dataBytes[i:i+4]))
 	}
 
-	result.Write(resultBytes)
+	if _, err = result.Write(resultBytes); err != nil {
+		return err
+	}
 
 	return nil
 }
 
 //DecodeByFileNames performs steganography decoding of data previously encoded by the Encode function.
 //The data is decoded from file carrier and it is saved in separate new file
-func DecodeByFileNames(carrierFileName string, newFileName string) error {
+func DecodeByFileNames(carrierFileName string, newFileName string) (err error) {
 	carrier, err := os.Open(carrierFileName)
-	defer carrier.Close()
 	if err != nil {
 		return fmt.Errorf("error opening carrier file: %v", err)
 	}
+	defer func() {
+		closeErr := carrier.Close()
+		if err == nil {
+			err = closeErr
+		}
+	}()
 
 	result, err := os.Create(newFileName)
-	defer result.Close()
 	if err != nil {
 		return fmt.Errorf("error creating result file: %v", err)
 	}
+	defer func() {
+		closeErr := result.Close()
+		if err == nil {
+			err = closeErr
+		}
+	}()
 
 	err = Decode(carrier, result)
 	if err != nil {
-		os.Remove(newFileName)
+		_ = os.Remove(newFileName)
 	}
-
 	return err
-
 }
 
 func align(dataBytes []byte) []byte {
@@ -101,11 +109,9 @@ func extractDataCount(RGBAImage *image.RGBA) int {
 
 	for x := 0; x < dx && count < dataSizeHeaderReservedBytes; x++ {
 		for y := 0; y < dy && count < dataSizeHeaderReservedBytes; y++ {
-
 			c := RGBAImage.RGBAAt(x, y)
 			dataCountBytes = append(dataCountBytes, bits.GetLastTwoBits(c.R), bits.GetLastTwoBits(c.G), bits.GetLastTwoBits(c.B))
 			count += 4
-
 		}
 	}
 
