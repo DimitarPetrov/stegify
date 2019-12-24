@@ -6,6 +6,7 @@ import (
 	"github.com/DimitarPetrov/stegify/bits"
 	"image"
 	"image/draw"
+	"image/jpeg"
 	_ "image/jpeg" //register jpeg image format
 	"image/png"
 	"io"
@@ -78,8 +79,10 @@ func Encode(carrier io.Reader, data io.Reader, result io.Writer) error {
 	setDataSizeHeader(RGBAImage, quartersOfBytesOf(dataCount))
 
 	switch format {
-	case "png", "jpeg":
+	case "png":
 		return png.Encode(result, RGBAImage)
+	case "jpeg":
+		return jpeg.Encode(result, RGBAImage, &jpeg.Options{Quality: 100})
 	default:
 		return fmt.Errorf("unsupported carrier format")
 	}
