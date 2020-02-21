@@ -58,7 +58,7 @@ func Decode(carrier io.Reader, result io.Writer) error {
 }
 
 //MultiCarrierDecode performs steganography decoding of Readers with previously encoded data chunks by the MultiCarrierEncode function and writes to result Writer.
-//The order of the carriers MUST be the same as the one when encoding.
+//NOTE: The order of the carriers MUST be the same as the one when encoding.
 func MultiCarrierDecode(carriers []io.Reader, result io.Writer) error {
 	for i := 0; i < len(carriers); i++ {
 		var chunkResult bytes.Buffer
@@ -79,18 +79,37 @@ func MultiCarrierDecode(carriers []io.Reader, result io.Writer) error {
 //DecodeByFileNames performs steganography decoding of data previously encoded by the Encode function.
 //The data is decoded from file carrier and it is saved in separate new file
 func DecodeByFileNames(carrierFileName string, newFileName string) (err error) {
-	carrier, err := os.Open(carrierFileName)
-	if err != nil {
-		return fmt.Errorf("error opening carrier file: %v", err)
-	}
-	defer func() {
-		closeErr := carrier.Close()
-		if err == nil {
-			err = closeErr
-		}
-	}()
+	return decodeByNames([]string{carrierFileName}, newFileName)
+}
 
-	result, err := os.Create(newFileName)
+//MultiCarrierDecodeByFileNames performs steganography decoding of data previously encoded by the MultiCarrierEncode function.
+//The data is decoded from carrier files and it is saved in separate new file
+//NOTE: The order of the carriers MUST be the same as the one when encoding.
+func MultiCarrierDecodeByFileNames(carrierFileName []string, newFileName string) (err error) {
+	return decodeByNames(carrierFileName, newFileName)
+}
+
+func decodeByNames(carrierNames []string, resultName string) (err error) {
+	if len(carrierNames) == 0 {
+		return fmt.Errorf("missing carriers names")
+	}
+
+	carriers := make([]io.Reader, 0, len(carrierNames))
+	for _, name := range carrierNames {
+		carrier, err := os.Open(name)
+		if err != nil {
+			return fmt.Errorf("error opening carrier file %s: %v", name, err)
+		}
+		defer func() {
+			closeErr := carrier.Close()
+			if err == nil {
+				err = closeErr
+			}
+		}()
+		carriers = append(carriers, carrier)
+	}
+
+	result, err := os.Create(resultName)
 	if err != nil {
 		return fmt.Errorf("error creating result file: %v", err)
 	}
@@ -101,9 +120,16 @@ func DecodeByFileNames(carrierFileName string, newFileName string) (err error) {
 		}
 	}()
 
-	err = Decode(carrier, result)
-	if err != nil {
-		_ = os.Remove(newFileName)
+	if len(carriers) > 1 {
+		err = MultiCarrierDecode(carriers, result)
+		if err != nil {
+			_ = os.Remove(resultName)
+		}
+	} else {
+		err = Decode(carriers[0], result)
+		if err != nil {
+			_ = os.Remove(resultName)
+		}
 	}
 	return err
 }

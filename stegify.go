@@ -6,32 +6,62 @@ import (
 	"fmt"
 	"github.com/DimitarPetrov/stegify/steg"
 	"os"
+	"strings"
 )
 
 const encode = "encode"
 const decode = "decode"
 
-var carrierFile = flag.String("carrier", "", "carrier file in which the data is encoded")
+type sliceFlag []string
+
+func (sf *sliceFlag) String() string {
+	return strings.Join(*sf, " ")
+}
+
+func (sf *sliceFlag) Set(value string) error {
+	*sf = append(*sf, value)
+	return nil
+}
+
+var carrierFile sliceFlag
+var carrierFiles = flag.String("carriers", "", "carrier files in which the data is encoded (separated by space and surrounded by quotes)")
 var dataFile = flag.String("data", "", "data file which is being encoded in carrier")
-var resultFile = flag.String("result", "result", "name of the result file")
+var resultFile sliceFlag
+var resultFiles = flag.String("results", "", "names of the result files (separated by space and surrounded by quotes)")
 
 func init() {
-	flag.StringVar(carrierFile, "c", "", "carrier file in which the data is encoded")
-	flag.StringVar(dataFile, "d", "", "data file which is being encoded in carrier")
-	flag.StringVar(resultFile, "r", "result", "name of the result file")
+	flag.StringVar(carrierFiles, "c", "", "carrier files in which the data is encoded (separated by space surrounded by quotes, shorthand for --carriers)")
+	flag.Var(&carrierFile, "carrier", "carrier file in which the data is encoded (could be used multiple times for multiple carriers)")
+	flag.StringVar(dataFile, "d", "", "data file which is being encoded in carrier (shorthand for --data)")
+	flag.Var(&resultFile, "result", "name of the result file (could be used multiple times for multiple result file names)")
+	flag.StringVar(resultFiles, "r", "", "names of the result files (separated by space and surrounded by quotes, shorthand for --results)")
 
 	flag.Usage = func() {
 		fmt.Fprintln(os.Stdout, "Usage: stegify [encode/decode] [flags...]")
 		flag.PrintDefaults()
+		fmt.Fprintln(os.Stdout, `NOTE: When multiple carriers are provided with different kinds of flags, the names provided through "carrier" flag are taken first and with "carriers"/"c" flags second.`)
+		fmt.Fprintln(os.Stdout, `NOTE: When no results are provided a default values will be used for the names of the results.`)
 	}
 }
 
 func main() {
 	operation := parseOperation()
 	flag.Parse()
+	carriers := parseCarriers()
+	results := parseResults()
 
-	if carrierFile == nil || *carrierFile == "" {
-		fmt.Fprintln(os.Stderr, "Carrier file must be specified. Use stegify --help for more information.")
+	if len(results) == 0 {
+		if operation == encode {
+			for i := range carriers {
+				results = append(results, fmt.Sprintf("result%d", i))
+			}
+		} else {
+			results = append(results, "result")
+		}
+	}
+
+	if len(results) != len(carriers) && operation == encode {
+		fmt.Fprintln(os.Stderr, "Carrier and result files count must be equal when encoding.")
 		os.Exit(1)
 	}
 
@@ -42,13 +72,17 @@ func main() {
 
 	switch operation {
 	case encode:
-		err := steg.EncodeByFileNames(*carrierFile, *dataFile, *resultFile)
+		err := steg.MultiCarrierEncodeByFileNames(carriers, *dataFile, results)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
 	case decode:
-		err := steg.DecodeByFileNames(*carrierFile, *resultFile)
+		if len(results) != 1 {
+			fmt.Fprintln(os.Stderr, "Only one result file expected.")
+			os.Exit(1)
+		}
+		err := steg.MultiCarrierDecodeByFileNames(carriers, results[0])
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
@@ -79,4 +113,35 @@ func parseOperation() string {
 
 	os.Args = append(os.Args[:1], os.Args[2:]...) // needed because go flags implementation stop parsing after first non-flag argument
 	return operation
+}
+
+func parseCarriers() []string {
+	carriers := make([]string, 0)
+	if len(carrierFile) != 0 {
+		carriers = append(carriers, carrierFile...)
+	}
+
+	if len(*carrierFiles) != 0 {
+		carriers = append(carriers, strings.Split(*carrierFiles, " ")...)
+	}
+
+	if len(carriers) == 0 {
+		fmt.Fprintln(os.Stderr, "Carrier file must be specified. Use stegify --help for more information.")
+		os.Exit(1)
+	}
+
+	return carriers
+}
+
+func parseResults() []string {
+	results := make([]string, 0)
+	if len(resultFile) != 0 {
+		results = append(results, resultFile...)
+	}
+
+	if len(*resultFiles) != 0 {
+		results = append(results, strings.Split(*resultFiles, " ")...)
+	}
+
+	return results
 }

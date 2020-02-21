@@ -119,20 +119,40 @@ func MultiCarrierEncode(carriers []io.Reader, data io.Reader, results []io.Write
 //EncodeByFileNames performs steganography encoding of data file in carrier file
 //and saves the steganography encoded product in new file.
 func EncodeByFileNames(carrierFileName, dataFileName, resultFileName string) (err error) {
-	carrier, err := os.Open(carrierFileName)
-	if err != nil {
-		return fmt.Errorf("error opening carrier file: %v", err)
-	}
-	defer func() {
-		closeErr := carrier.Close()
-		if err == nil {
-			err = closeErr
-		}
-	}()
+	return encodeByNames([]string{carrierFileName}, dataFileName, []string{resultFileName})
+}
 
-	data, err := os.Open(dataFileName)
+//MultiCarrierEncodeByFileNames performs steganography encoding of data file in equal pieces in each of the carrier files
+//and saves the steganography encoded product in new set of result files.
+func MultiCarrierEncodeByFileNames(carrierFileName []string, dataFileName string, resultFileName []string) (err error) {
+	return encodeByNames(carrierFileName, dataFileName, resultFileName)
+}
+
+func encodeByNames(carrierNames []string, dataName string, resultNames []string) (err error) {
+	if len(carrierNames) == 0 {
+		return fmt.Errorf("missing carriers names")
+	}
+	if len(carrierNames) != len(resultNames) {
+		return fmt.Errorf("different number of carriers and results")
+	}
+	carriers := make([]io.Reader, 0, len(carrierNames))
+	for _, name := range carrierNames {
+		carrier, err := os.Open(name)
+		if err != nil {
+			return fmt.Errorf("error opening carrier file %s: %v", name, err)
+		}
+		defer func() {
+			closeErr := carrier.Close()
+			if err == nil {
+				err = closeErr
+			}
+		}()
+		carriers = append(carriers, carrier)
+	}
+
+	data, err := os.Open(dataName)
 	if err != nil {
-		return fmt.Errorf("error opening data file: %v", err)
+		return fmt.Errorf("error opening data file %s: %v", dataName, err)
 	}
 	defer func() {
 		closeErr := data.Close()
@@ -141,21 +161,35 @@ func EncodeByFileNames(carrierFileName, dataFileName, resultFileName string) (er
 		}
 	}()
 
-	result, err := os.Create(resultFileName)
-	if err != nil {
-		return fmt.Errorf("error creating result file: %v", err)
-	}
-	defer func() {
-		closeErr := result.Close()
-		if err == nil {
-			err = closeErr
+	results := make([]io.Writer, 0, len(resultNames))
+	for _, name := range resultNames {
+		result, err := os.Create(name)
+		if err != nil {
+			return fmt.Errorf("error creating result file %s: %v", name, err)
 		}
-	}()
-
-	err = Encode(carrier, data, result)
-	if err != nil {
-		_ = os.Remove(resultFileName)
+		defer func() {
+			closeErr := result.Close()
+			if err == nil {
+				err = closeErr
+			}
+		}()
+		results = append(results, result)
 	}
+
+	if len(carriers) > 1 {
+		err = MultiCarrierEncode(carriers, data, results)
+		if err != nil {
+			for _, name := range resultNames {
+				_ = os.Remove(name)
+			}
+		}
+	} else {
+		err = Encode(carriers[0], data, results[0])
+		if err != nil {
+			_ = os.Remove(resultNames[0])
+		}
+	}
+
 	return err
 }
 
