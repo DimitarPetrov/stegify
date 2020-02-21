@@ -1,6 +1,7 @@
 package steg
 
 import (
+	"bytes"
 	"encoding/binary"
 	"fmt"
 	"github.com/DimitarPetrov/stegify/bits"
@@ -9,6 +10,7 @@ import (
 	_ "image/jpeg" //register jpeg image format
 	"image/png"
 	"io"
+	"io/ioutil"
 	"os"
 )
 
@@ -83,6 +85,35 @@ func Encode(carrier io.Reader, data io.Reader, result io.Writer) error {
 	default:
 		return fmt.Errorf("unsupported carrier format")
 	}
+}
+
+//MultiCarrierEncode performs steganography encoding of data Reader in equal pieces in each of the carriers
+//and writes it to the result Writers encoded as PNG images.
+func MultiCarrierEncode(carriers []io.Reader, data io.Reader, results []io.Writer) error {
+	if len(carriers) != len(results) {
+		return fmt.Errorf("different number of carriers and results")
+	}
+
+	dataBytes, err := ioutil.ReadAll(data)
+	if err != nil {
+		return fmt.Errorf("error reading data %v", err)
+	}
+
+	chunkSize := len(dataBytes) / len(carriers)
+	dataChunks := make([]io.Reader, 0, len(carriers))
+	for i := 0; i < len(dataBytes); i += chunkSize {
+		if i+chunkSize > len(dataBytes) { // last iteration
+			dataChunks = append(dataChunks, bytes.NewReader(dataBytes[i:]))
+		}
+		dataChunks = append(dataChunks, bytes.NewReader(dataBytes[i:i+chunkSize]))
+	}
+
+	for i := 0; i < len(carriers); i++ {
+		if err := Encode(carriers[i], dataChunks[i], results[i]); err != nil {
+			return fmt.Errorf("error encoding chunk with index %d: %v", i, err)
+		}
+	}
+	return nil
 }
 
 //EncodeByFileNames performs steganography encoding of data file in carrier file

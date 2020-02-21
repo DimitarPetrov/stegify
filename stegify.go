@@ -8,6 +8,9 @@ import (
 	"os"
 )
 
+const encode = "encode"
+const decode = "decode"
+
 var carrierFile = flag.String("carrier", "", "carrier file in which the data is encoded")
 var dataFile = flag.String("data", "", "data file which is being encoded in carrier")
 var resultFile = flag.String("result", "result", "name of the result file")
@@ -16,22 +19,24 @@ func init() {
 	flag.StringVar(carrierFile, "c", "", "carrier file in which the data is encoded")
 	flag.StringVar(dataFile, "d", "", "data file which is being encoded in carrier")
 	flag.StringVar(resultFile, "r", "result", "name of the result file")
-}
 
-const encode = "encode"
-const decode = "decode"
+	flag.Usage = func() {
+		fmt.Fprintln(os.Stdout, "Usage: stegify [encode/decode] [flags...]")
+		flag.PrintDefaults()
+	}
+}
 
 func main() {
 	operation := parseOperation()
 	flag.Parse()
 
 	if carrierFile == nil || *carrierFile == "" {
-		fmt.Fprintln(os.Stderr, "Carrier file must be specified")
+		fmt.Fprintln(os.Stderr, "Carrier file must be specified. Use stegify --help for more information.")
 		os.Exit(1)
 	}
 
 	if (dataFile == nil || *dataFile == "") && operation == encode {
-		fmt.Fprintln(os.Stderr, "Data file must be specified")
+		fmt.Fprintln(os.Stderr, "Data file must be specified. Use stegify --help for more information.")
 		os.Exit(1)
 	}
 
@@ -53,16 +58,22 @@ func main() {
 
 func parseOperation() string {
 	if len(os.Args) < 2 {
-		fmt.Fprintln(os.Stderr, "Operation must be specified")
+		fmt.Fprintln(os.Stderr, "Operation must be specified [encode/decode]. Use stegify --help for more information.")
 		os.Exit(1)
 	}
 	operation := os.Args[1]
 	if operation != encode && operation != decode {
-		if operation == "--help" {
+		helpFlags := map[string]bool{
+			"--help": true,
+			"-help":  true,
+			"--h":    true,
+			"-h":     true,
+		}
+		if helpFlags[operation] {
 			flag.Parse()
 			os.Exit(0)
 		}
-		fmt.Fprintf(os.Stderr, "Unsupported operation: %s. Only encode/decode operations supported", operation)
+		fmt.Fprintf(os.Stderr, "Unsupported operation: %s. Only [encode/decode] operations are supported.\n Use stegify --help for more information.", operation)
 		os.Exit(1)
 	}
 
