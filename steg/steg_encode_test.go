@@ -1,7 +1,8 @@
-package steg
+package steg_test
 
 import (
 	"bytes"
+	"github.com/DimitarPetrov/stegify/steg"
 	"io"
 	"io/ioutil"
 	"os"
@@ -21,7 +22,7 @@ func BenchmarkEncode(b *testing.B) {
 		}
 
 		var result bytes.Buffer
-		err = Encode(carrier, data, &result)
+		err = steg.Encode(carrier, data, &result)
 		if err != nil {
 			b.Fatalf("Error encoding file: %v", err)
 		}
@@ -33,7 +34,7 @@ func BenchmarkEncode(b *testing.B) {
 
 func BenchmarkEncodeByFileNames(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		err := EncodeByFileNames("../examples/street.jpeg", "../examples/lake.jpeg", "benchmark_result.jpeg")
+		err := steg.EncodeByFileNames("../examples/street.jpeg", "../examples/lake.jpeg", "benchmark_result.jpeg")
 		if err != nil {
 			b.Fatalf("Error encoding file: %v", err)
 		}
@@ -52,12 +53,12 @@ func TestEncode(t *testing.T) {
 				t.Fatalf("Exactly one reader expected")
 			}
 			var encodeResult bytes.Buffer
-			err := Encode(readers[0], reader, &encodeResult)
+			err := steg.Encode(readers[0], reader, &encodeResult)
 			if err != nil {
 				t.Fatalf("Error encoding files: %v", err)
 			}
 
-			err = Decode(&encodeResult, writer)
+			err = steg.Decode(&encodeResult, writer)
 			if err != nil {
 				t.Fatalf("Error decoding files: %v", err)
 			}
@@ -69,12 +70,12 @@ func TestMultiCarrierEncode(t *testing.T) {
 		func(readers []io.Reader, reader io.Reader, writer io.Writer) {
 			var encodeResult1 bytes.Buffer
 			var encodeResult2 bytes.Buffer
-			err := MultiCarrierEncode(readers, reader, []io.Writer{&encodeResult1, &encodeResult2})
+			err := steg.MultiCarrierEncode(readers, reader, []io.Writer{&encodeResult1, &encodeResult2})
 			if err != nil {
 				t.Fatalf("Error encoding files: %v", err)
 			}
 
-			err = MultiCarrierDecode([]io.Reader{&encodeResult1, &encodeResult2}, writer)
+			err = steg.MultiCarrierDecode([]io.Reader{&encodeResult1, &encodeResult2}, writer)
 			if err != nil {
 				t.Fatalf("Error decoding files: %v", err)
 			}
@@ -82,7 +83,7 @@ func TestMultiCarrierEncode(t *testing.T) {
 }
 
 func TestEncodeByFileNames(t *testing.T) {
-	err := EncodeByFileNames("../examples/street.jpeg", "../examples/lake.jpeg", "encoded_result.jpeg")
+	err := steg.EncodeByFileNames("../examples/street.jpeg", "../examples/lake.jpeg", "encoded_result.jpeg")
 	if err != nil {
 		t.Fatalf("Error encoding file: %v", err)
 	}
@@ -94,7 +95,7 @@ func TestEncodeByFileNames(t *testing.T) {
 		}
 	}()
 
-	err = DecodeByFileNames("encoded_result.jpeg", "result")
+	err = steg.DecodeByFileNames("encoded_result.jpeg", "result")
 	if err != nil {
 		t.Fatalf("Error decoding file: %v", err)
 	}
@@ -133,7 +134,7 @@ func TestEncodeByFileNames(t *testing.T) {
 }
 
 func TestEncodeShouldReturnErrorWhenCarrierFileMissing(t *testing.T) {
-	err := EncodeByFileNames("not_existing_file", "../examples/lake.jpeg", "encoded_result.jpeg")
+	err := steg.EncodeByFileNames("not_existing_file", "../examples/lake.jpeg", "encoded_result.jpeg")
 	if err == nil {
 		os.Remove("encoded_result.jpeg")
 		t.FailNow()
@@ -155,7 +156,7 @@ func TestEncodeShouldReturnErrorWhenCarrierFileIsNotImage(t *testing.T) {
 	defer data.Close()
 
 	var result bytes.Buffer
-	err = Encode(carrier, data, &result)
+	err = steg.Encode(carrier, data, &result)
 	if err == nil {
 		t.FailNow()
 	}
@@ -163,7 +164,7 @@ func TestEncodeShouldReturnErrorWhenCarrierFileIsNotImage(t *testing.T) {
 }
 
 func TestEncodeByFileNamesShouldReturnErrorWhenDataFileMissing(t *testing.T) {
-	err := EncodeByFileNames("../examples/street.jpeg", "not_existing_file", "encoded_result.jpeg")
+	err := steg.EncodeByFileNames("../examples/street.jpeg", "not_existing_file", "encoded_result.jpeg")
 	if err == nil {
 		os.Remove("encoded_result.jpeg")
 		t.FailNow()
@@ -185,7 +186,7 @@ func TestEncodeShouldReturnErrorWhenDataFileTooLarge(t *testing.T) {
 	defer data.Close()
 
 	var result bytes.Buffer
-	err = Encode(carrier, data, &result)
+	err = steg.Encode(carrier, data, &result)
 	if err == nil {
 		t.FailNow()
 	}

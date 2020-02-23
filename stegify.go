@@ -1,4 +1,4 @@
-//Command line tool capable of steganography encoding and decoding any file in given image as carrier
+//Command line tool capable of steganography encoding and decoding any file within given images as carriers
 package main
 
 import (
@@ -23,23 +23,23 @@ func (sf *sliceFlag) Set(value string) error {
 	return nil
 }
 
-var carrierFile sliceFlag
+var carrierFilesSlice sliceFlag
 var carrierFiles = flag.String("carriers", "", "carrier files in which the data is encoded (separated by space and surrounded by quotes)")
 var dataFile = flag.String("data", "", "data file which is being encoded in carrier")
-var resultFile sliceFlag
+var resultFilesSlice sliceFlag
 var resultFiles = flag.String("results", "", "names of the result files (separated by space and surrounded by quotes)")
 
 func init() {
 	flag.StringVar(carrierFiles, "c", "", "carrier files in which the data is encoded (separated by space surrounded by quotes, shorthand for --carriers)")
-	flag.Var(&carrierFile, "carrier", "carrier file in which the data is encoded (could be used multiple times for multiple carriers)")
+	flag.Var(&carrierFilesSlice, "carrier", "carrier file in which the data is encoded (could be used multiple times for multiple carriers)")
 	flag.StringVar(dataFile, "d", "", "data file which is being encoded in carrier (shorthand for --data)")
-	flag.Var(&resultFile, "result", "name of the result file (could be used multiple times for multiple result file names)")
+	flag.Var(&resultFilesSlice, "result", "name of the result file (could be used multiple times for multiple result file names)")
 	flag.StringVar(resultFiles, "r", "", "names of the result files (separated by space and surrounded by quotes, shorthand for --results)")
 
 	flag.Usage = func() {
 		fmt.Fprintln(os.Stdout, "Usage: stegify [encode/decode] [flags...]")
 		flag.PrintDefaults()
-		fmt.Fprintln(os.Stdout, `NOTE: When multiple carriers are provided with different kinds of flags, the names provided through "carrier" flag are taken first and with "carriers"/"c" flags second.`)
+		fmt.Fprintln(os.Stdout, `NOTE: When multiple carriers are provided with different kinds of flags, the names provided through "carrier" flag are taken first and with "carriers"/"c" flags second. Same goes for the result/results flag.`)
 		fmt.Fprintln(os.Stdout, `NOTE: When no results are provided a default values will be used for the names of the results.`)
 	}
 }
@@ -117,8 +117,8 @@ func parseOperation() string {
 
 func parseCarriers() []string {
 	carriers := make([]string, 0)
-	if len(carrierFile) != 0 {
-		carriers = append(carriers, carrierFile...)
+	if len(carrierFilesSlice) != 0 {
+		carriers = append(carriers, carrierFilesSlice...)
 	}
 
 	if len(*carrierFiles) != 0 {
@@ -135,8 +135,8 @@ func parseCarriers() []string {
 
 func parseResults() []string {
 	results := make([]string, 0)
-	if len(resultFile) != 0 {
-		results = append(results, resultFile...)
+	if len(resultFilesSlice) != 0 {
+		results = append(results, resultFilesSlice...)
 	}
 
 	if len(*resultFiles) != 0 {
