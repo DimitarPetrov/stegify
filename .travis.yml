@@ -10,6 +10,6 @@ install:
 
 script:
   - go test ./... -v -covermode=count -coverprofile=coverage.out
-  - cat coverage.out | grep -v "stegify.go" > coverage.out
-  - goveralls -coverprofile=coverage.out -service=travis-ci
+  - cat coverage.out | grep -v "stegify.go" > cover.out
+  - goveralls -coverprofile=cover.out -service=travis-ci
   - golangci-lint run
