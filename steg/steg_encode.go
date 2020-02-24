@@ -102,7 +102,7 @@ func MultiCarrierEncode(carriers []io.Reader, data io.Reader, results []io.Write
 	chunkSize := len(dataBytes) / len(carriers)
 	dataChunks := make([]io.Reader, 0, len(carriers))
 	for i := 0; i < len(dataBytes); i += chunkSize {
-		if i+chunkSize > len(dataBytes) { // last iteration
+		if i+chunkSize >= len(dataBytes) { // last iteration
 			dataChunks = append(dataChunks, bytes.NewReader(dataBytes[i:]))
 		}
 		dataChunks = append(dataChunks, bytes.NewReader(dataBytes[i:i+chunkSize]))
@@ -119,24 +119,20 @@ func MultiCarrierEncode(carriers []io.Reader, data io.Reader, results []io.Write
 //EncodeByFileNames performs steganography encoding of data file in carrier file
 //and saves the steganography encoded product in new file.
 func EncodeByFileNames(carrierFileName, dataFileName, resultFileName string) (err error) {
-	return encodeByNames([]string{carrierFileName}, dataFileName, []string{resultFileName})
+	return MultiCarrierEncodeByFileNames([]string{carrierFileName}, dataFileName, []string{resultFileName})
 }
 
 //MultiCarrierEncodeByFileNames performs steganography encoding of data file in equal pieces in each of the carrier files
 //and saves the steganography encoded product in new set of result files.
-func MultiCarrierEncodeByFileNames(carrierFileName []string, dataFileName string, resultFileName []string) (err error) {
-	return encodeByNames(carrierFileName, dataFileName, resultFileName)
-}
-
-func encodeByNames(carrierNames []string, dataName string, resultNames []string) (err error) {
-	if len(carrierNames) == 0 {
+func MultiCarrierEncodeByFileNames(carrierFileNames []string, dataFileName string, resultFileNames []string) (err error) {
+	if len(carrierFileNames) == 0 {
 		return fmt.Errorf("missing carriers names")
 	}
-	if len(carrierNames) != len(resultNames) {
+	if len(carrierFileNames) != len(resultFileNames) {
 		return fmt.Errorf("different number of carriers and results")
 	}
-	carriers := make([]io.Reader, 0, len(carrierNames))
-	for _, name := range carrierNames {
+	carriers := make([]io.Reader, 0, len(carrierFileNames))
+	for _, name := range carrierFileNames {
 		carrier, err := os.Open(name)
 		if err != nil {
 			return fmt.Errorf("error opening carrier file %s: %v", name, err)
@@ -150,9 +146,9 @@ func encodeByNames(carrierNames []string, dataName string, resultNames []string)
 		carriers = append(carriers, carrier)
 	}
 
-	data, err := os.Open(dataName)
+	data, err := os.Open(dataFileName)
 	if err != nil {
-		return fmt.Errorf("error opening data file %s: %v", dataName, err)
+		return fmt.Errorf("error opening data file %s: %v", dataFileName, err)
 	}
 	defer func() {
 		closeErr := data.Close()
@@ -161,8 +157,8 @@ func encodeByNames(carrierNames []string, dataName string, resultNames []string)
 		}
 	}()
 
-	results := make([]io.Writer, 0, len(resultNames))
-	for _, name := range resultNames {
+	results := make([]io.Writer, 0, len(resultFileNames))
+	for _, name := range resultFileNames {
 		result, err := os.Create(name)
 		if err != nil {
 			return fmt.Errorf("error creating result file %s: %v", name, err)
@@ -176,20 +172,12 @@ func encodeByNames(carrierNames []string, dataName string, resultNames []string)
 		results = append(results, result)
 	}
 
-	if len(carriers) > 1 {
-		err = MultiCarrierEncode(carriers, data, results)
-		if err != nil {
-			for _, name := range resultNames {
-				_ = os.Remove(name)
-			}
-		}
-	} else {
-		err = Encode(carriers[0], data, results[0])
-		if err != nil {
-			_ = os.Remove(resultNames[0])
+	err = MultiCarrierEncode(carriers, data, results)
+	if err != nil {
+		for _, name := range resultFileNames {
+			_ = os.Remove(name)
 		}
 	}
-
 	return err
 }
 
@@ -205,7 +193,6 @@ func quartersOfBytesOf(counter uint32) []byte {
 	}
 
 	return quarters
-
 }
 
 func setDataSizeHeader(RGBAImage *image.RGBA, dataCountBytes []byte) {
@@ -226,7 +213,6 @@ func setDataSizeHeader(RGBAImage *image.RGBA, dataCountBytes []byte) {
 
 		}
 	}
-
 }
 
 func setColorSegment(colorSegment *byte, data <-chan byte, errChan <-chan error) (hasMoreBytes bool, err error) {

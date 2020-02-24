@@ -133,8 +133,26 @@ func TestEncodeByFileNames(t *testing.T) {
 	}
 }
 
-func TestEncodeShouldReturnErrorWhenCarrierFileMissing(t *testing.T) {
+func TestEncodeShouldReturnErrorWhenCarrierFileNotExists(t *testing.T) {
 	err := steg.EncodeByFileNames("not_existing_file", "../examples/lake.jpeg", "encoded_result.jpeg")
+	if err == nil {
+		os.Remove("encoded_result.jpeg")
+		t.FailNow()
+	}
+	t.Log(err)
+}
+
+func TestMultiCarrierEncodeShouldReturnErrorWhenCarrierFileNotProvided(t *testing.T) {
+	err := steg.MultiCarrierEncodeByFileNames([]string{}, "../examples/lake.jpeg", []string{"encoded_result.jpeg"})
+	if err == nil {
+		os.Remove("encoded_result.jpeg")
+		t.FailNow()
+	}
+	t.Log(err)
+}
+
+func TestMultiCarrierEncodeByFileNamesShouldReturnErrorWhenCarrierAndResultFilesCountDoesNotMatch(t *testing.T) {
+	err := steg.MultiCarrierEncodeByFileNames([]string{"../examples/street.jpeg", "../examples/lake.jpeg"}, "../examples/lake.jpeg", []string{"encoded_result.jpeg"})
 	if err == nil {
 		os.Remove("encoded_result.jpeg")
 		t.FailNow()
@@ -188,6 +206,44 @@ func TestEncodeShouldReturnErrorWhenDataFileTooLarge(t *testing.T) {
 	var result bytes.Buffer
 	err = steg.Encode(carrier, data, &result)
 	if err == nil {
+		t.FailNow()
+	}
+	t.Log(err)
+}
+
+func TestMultiCarrierEncodeShouldReturnErrorWhenDataFileTooLarge(t *testing.T) {
+	carrier1, err := os.Open("../examples/lake.jpeg")
+	if err != nil {
+		t.Fatalf("Error opening carrier file: %v", err)
+	}
+	defer carrier1.Close()
+
+	carrier2, err := os.Open("../examples/street.jpeg")
+	if err != nil {
+		t.Fatalf("Error opening carrier file: %v", err)
+	}
+	defer carrier2.Close()
+
+	data, err := os.Open("../examples/test_decode.jpeg")
+	if err != nil {
+		t.Fatalf("Error opening data file: %v", err)
+	}
+	defer data.Close()
+
+	var result1 bytes.Buffer
+	var result2 bytes.Buffer
+	err = steg.MultiCarrierEncode([]io.Reader{carrier1,carrier2}, data, []io.Writer{&result1, &result2})
+	if err == nil {
+		t.FailNow()
+	}
+	t.Log(err)
+}
+
+func TestMultiCarrierEncodeByFileNamesShouldReturnErrorWhenDataFileTooLarge(t *testing.T) {
+	err := steg.MultiCarrierEncodeByFileNames([]string{"../examples/lake.jpeg","../examples/street.jpeg"}, "../examples/test_decode.jpeg", []string{"result1", "result2"})
+	if err == nil {
+		os.Remove("result1")
+		os.Remove("result2")
 		t.FailNow()
 	}
 	t.Log(err)
