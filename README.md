@@ -20,13 +20,9 @@ The `Result` file contains the `Data` file hidden in it. And as you can see it i
 
 If multiple `Carrier` files are provided, the `Data` file will be split in pieces and every piece is encoded in the respective carrier.
 
-| Carrier1                                | Carrier2                              |
-| ----------------------------------------|---------------------------------------|
-| ![Original File1](examples/street.jpeg) | ![Original File2](examples/lake.jpeg) |
-
-| Data                           |
-|--------------------------------|
-|![Data File](examples/video.gif)|
+| Carrier1                                | Carrier2                              |Data                              |
+| ----------------------------------------|---------------------------------------|----------------------------------|
+| ![Original File1](examples/street.jpeg) | ![Original File2](examples/lake.jpeg) | ![Data File](examples/video.gif) |
 
 | Result1                                                  |Result2                                                   |
 |----------------------------------------------------------|----------------------------------------------------------|
