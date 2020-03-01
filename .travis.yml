@@ -13,3 +13,18 @@ script:
   - cat coverage.out | grep -v "stegify.go" > cover.out
   - goveralls -coverprofile=cover.out -service=travis-ci
   - golangci-lint run
+  
+  - CGO_ENABLED=0 GOARCH=386 GOOS=linux go build -o out/stegify_linux_i686 .
+  - CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build -o out/stegify_linux_x86-64 .
+  - GOARCH=amd64 GOOS=darwin go build -o out/stegify_osx .
+  - GOARCH=386 GOOS=windows go build -o out/stegify_win32.exe .
+  - GOARCH=amd64 GOOS=windows go build -o out/stegify_win64.exe .
+  
+  deploy:
+    provider: releases
+    api_key: $GITHUB_TOKEN
+    file_glob: true
+    file: out/*
+    skip_cleanup: true
+    on:
+      tags: true
