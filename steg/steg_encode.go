@@ -1,6 +1,7 @@
 package steg
 
 import (
+	"bytes"
 	"encoding/binary"
 	"fmt"
 	"github.com/DimitarPetrov/stegify/bits"
@@ -9,6 +10,7 @@ import (
 	_ "image/jpeg" //register jpeg image format
 	"image/png"
 	"io"
+	"io/ioutil"
 	"os"
 )
 
@@ -85,23 +87,70 @@ func Encode(carrier io.Reader, data io.Reader, result io.Writer) error {
 	}
 }
 
+//MultiCarrierEncode performs steganography encoding of data Reader in equal pieces in each of the carriers
+//and writes it to the result Writers encoded as PNG images.
+func MultiCarrierEncode(carriers []io.Reader, data io.Reader, results []io.Writer) error {
+	if len(carriers) != len(results) {
+		return fmt.Errorf("different number of carriers and results")
+	}
+
+	dataBytes, err := ioutil.ReadAll(data)
+	if err != nil {
+		return fmt.Errorf("error reading data %v", err)
+	}
+
+	chunkSize := len(dataBytes) / len(carriers)
+	dataChunks := make([]io.Reader, 0, len(carriers))
+	chunksCount := 0
+	for i := 0; i < len(dataBytes) && chunksCount < len(carriers); i += chunkSize {
+		chunksCount++
+		if i+chunkSize >= len(dataBytes) || chunksCount == len(carriers) { // last iteration
+			dataChunks = append(dataChunks, bytes.NewReader(dataBytes[i:]))
+		}
+		dataChunks = append(dataChunks, bytes.NewReader(dataBytes[i:i+chunkSize]))
+	}
+
+	for i := 0; i < len(carriers); i++ {
+		if err := Encode(carriers[i], dataChunks[i], results[i]); err != nil {
+			return fmt.Errorf("error encoding chunk with index %d: %v", i, err)
+		}
+	}
+	return nil
+}
+
 //EncodeByFileNames performs steganography encoding of data file in carrier file
 //and saves the steganography encoded product in new file.
 func EncodeByFileNames(carrierFileName, dataFileName, resultFileName string) (err error) {
-	carrier, err := os.Open(carrierFileName)
-	if err != nil {
-		return fmt.Errorf("error opening carrier file: %v", err)
+	return MultiCarrierEncodeByFileNames([]string{carrierFileName}, dataFileName, []string{resultFileName})
+}
+
+//MultiCarrierEncodeByFileNames performs steganography encoding of data file in equal pieces in each of the carrier files
+//and saves the steganography encoded product in new set of result files.
+func MultiCarrierEncodeByFileNames(carrierFileNames []string, dataFileName string, resultFileNames []string) (err error) {
+	if len(carrierFileNames) == 0 {
+		return fmt.Errorf("missing carriers names")
 	}
-	defer func() {
-		closeErr := carrier.Close()
-		if err == nil {
-			err = closeErr
+	if len(carrierFileNames) != len(resultFileNames) {
+		return fmt.Errorf("different number of carriers and results")
+	}
+	carriers := make([]io.Reader, 0, len(carrierFileNames))
+	for _, name := range carrierFileNames {
+		carrier, err := os.Open(name)
+		if err != nil {
+			return fmt.Errorf("error opening carrier file %s: %v", name, err)
 		}
-	}()
+		defer func() {
+			closeErr := carrier.Close()
+			if err == nil {
+				err = closeErr
+			}
+		}()
+		carriers = append(carriers, carrier)
+	}
 
 	data, err := os.Open(dataFileName)
 	if err != nil {
-		return fmt.Errorf("error opening data file: %v", err)
+		return fmt.Errorf("error opening data file %s: %v", dataFileName, err)
 	}
 	defer func() {
 		closeErr := data.Close()
@@ -110,20 +159,26 @@ func EncodeByFileNames(carrierFileName, dataFileName, resultFileName string) (er
 		}
 	}()
 
-	result, err := os.Create(resultFileName)
-	if err != nil {
-		return fmt.Errorf("error creating result file: %v", err)
-	}
-	defer func() {
-		closeErr := result.Close()
-		if err == nil {
-			err = closeErr
+	results := make([]io.Writer, 0, len(resultFileNames))
+	for _, name := range resultFileNames {
+		result, err := os.Create(name)
+		if err != nil {
+			return fmt.Errorf("error creating result file %s: %v", name, err)
 		}
-	}()
+		defer func() {
+			closeErr := result.Close()
+			if err == nil {
+				err = closeErr
+			}
+		}()
+		results = append(results, result)
+	}
 
-	err = Encode(carrier, data, result)
+	err = MultiCarrierEncode(carriers, data, results)
 	if err != nil {
-		_ = os.Remove(resultFileName)
+		for _, name := range resultFileNames {
+			_ = os.Remove(name)
+		}
 	}
 	return err
 }
@@ -140,7 +195,6 @@ func quartersOfBytesOf(counter uint32) []byte {
 	}
 
 	return quarters
-
 }
 
 func setDataSizeHeader(RGBAImage *image.RGBA, dataCountBytes []byte) {
@@ -161,7 +215,6 @@ func setDataSizeHeader(RGBAImage *image.RGBA, dataCountBytes []byte) {
 
 		}
 	}
-
 }
 
 func setColorSegment(colorSegment *byte, data <-chan byte, errChan <-chan error) (hasMoreBytes bool, err error) {
