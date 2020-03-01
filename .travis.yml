@@ -20,11 +20,11 @@ script:
   - GOARCH=386 GOOS=windows go build -o out/stegify_win32.exe .
   - GOARCH=amd64 GOOS=windows go build -o out/stegify_win64.exe .
   
-  deploy:
-    provider: releases
-    api_key: $GITHUB_TOKEN
-    file_glob: true
-    file: out/*
-    skip_cleanup: true
-    on:
-      tags: true
+deploy:
+  provider: releases
+  api_key: $GITHUB_TOKEN
+  file_glob: true
+  file: out/*
+  skip_cleanup: true
+  on:
+    tags: true
