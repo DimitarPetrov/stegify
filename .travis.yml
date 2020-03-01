@@ -23,7 +23,7 @@ script:
 deploy:
   provider: releases
   api_key: 
-    secure: $GITHUB_TOKEN
+    secure: "bP3tGzqpdYeVUw+9cnJvAPDSuN/+XrC9nUs1kQ7MUSHr+wkFwIFa1iRAseclr70Eika5SQaz7ehEINrJYxs4K3N/T9wpNOw0oO2+AFYfE2I088Ew2NlrMGxBvPy3pJDzY5u15wS+19r17GbU1mu+p4JAx47C7FfHXOMOZQ23vbDmOFlp7pTgjHm623W4ii7cYnDfCLiYZ3Nb5bK3ImfYdg2B80JqCRr1DVX5HqzRNJXEKOAyegMst0GmVgpbh9+3W/RrQyC7Um/tzmlVww9TXPGN9RDqMQ8N9k/kbj3NG7BPSVLVw2mWbJVuhWpBw6e+SFb5shgkWYIngphitalqkFJ4EZlvFLoO5/WuZ98hfe1h2P8dSpZ7olqlM2j0yhMJRzNRbBXQU/b+sSxDZoeg0rN4EDagJ3DX5fdWpb79oo/L3mUZvepZvGYLI79Hx233Q0T3CUjK9vT5f3mcy1mpYGxW3Ial3Q1Uso13+QJjlh0iB+SV00ZgvKcSxp/lpaHzNPqp4/srHfwSx/UQzN6d9duOJvTPsKC4EJ8IDx8iCeXvBZclkUGzu3WcZaoz4HYq1Uvl2aRWd2kbNzwCYBok+uTqQoxOf3aqk5/tzikQdGRrUr5OqVEVYnE41SZeJn01NANch0V1SC6if8WIjGWvtzgDdDWnKwQAIKEn0SiXpAQ="
   file_glob: true
   file: out/*
   skip_cleanup: true
