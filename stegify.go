@@ -24,22 +24,22 @@ func (sf *sliceFlag) Set(value string) error {
 }
 
 var carrierFilesSlice sliceFlag
-var carrierFiles = flag.String("carriers", "", "carrier files in which the data is encoded (separated by space and surrounded by quotes)")
-var dataFile = flag.String("data", "", "data file which is being encoded in carrier")
+var carrierFiles = flag.String("carriers", "", "carrier files in which the data is encoded (separated by space)")
+var dataFile = flag.String("data", "", "data file which is being encoded in the carrier")
 var resultFilesSlice sliceFlag
-var resultFiles = flag.String("results", "", "names of the result files (separated by space and surrounded by quotes)")
+var resultFiles = flag.String("results", "", "names of the result files (separated by space)")
 
 func init() {
-	flag.StringVar(carrierFiles, "c", "", "carrier files in which the data is encoded (separated by space surrounded by quotes, shorthand for --carriers)")
+	flag.StringVar(carrierFiles, "c", "", "carrier files in which the data is encoded (separated by space, shorthand for --carriers)")
 	flag.Var(&carrierFilesSlice, "carrier", "carrier file in which the data is encoded (could be used multiple times for multiple carriers)")
-	flag.StringVar(dataFile, "d", "", "data file which is being encoded in carrier (shorthand for --data)")
+	flag.StringVar(dataFile, "d", "", "data file which is being encoded in the carrier (shorthand for --data)")
 	flag.Var(&resultFilesSlice, "result", "name of the result file (could be used multiple times for multiple result file names)")
-	flag.StringVar(resultFiles, "r", "", "names of the result files (separated by space and surrounded by quotes, shorthand for --results)")
+	flag.StringVar(resultFiles, "r", "", "names of the result files (separated by space, shorthand for --results)")
 
 	flag.Usage = func() {
 		fmt.Fprintln(os.Stdout, "Usage: stegify [encode/decode] [flags...]")
 		flag.PrintDefaults()
-		fmt.Fprintln(os.Stdout, `NOTE: When multiple carriers are provided with different kinds of flags, the names provided through "carrier" flag are taken first and with "carriers"/"c" flags second. Same goes for the result/results flag.`)
+		fmt.Fprintln(os.Stdout, `NOTE: When multiple carriers are provided with different kinds of flags, the names provided through "carrier" flag are taken first and with "carriers"/"c" flags second. Same goes for the "result"/"results" flags.`)
 		fmt.Fprintln(os.Stdout, `NOTE: When no results are provided a default values will be used for the names of the results.`)
 	}
 }
@@ -50,34 +50,31 @@ func main() {
 	carriers := parseCarriers()
 	results := parseResults()
 
-	if len(results) == 0 {
-		if operation == encode {
+	switch operation {
+	case encode:
+		if len(results) == 0 { // if no results provided use defaults
 			for i := range carriers {
 				results = append(results, fmt.Sprintf("result%d", i))
 			}
-		} else {
-			results = append(results, "result")
 		}
-	}
+		if len(results) != len(carriers) {
+			fmt.Fprintln(os.Stderr, "Carrier and result files count must be equal when encoding.")
+			os.Exit(1)
+		}
+		if dataFile == nil || *dataFile == "" {
+			fmt.Fprintln(os.Stderr, "Data file must be specified. Use stegify --help for more information.")
+			os.Exit(1)
+		}
 
-	if len(results) != len(carriers) && operation == encode {
-		fmt.Fprintln(os.Stderr, "Carrier and result files count must be equal when encoding.")
-		os.Exit(1)
-	}
-
-	if (dataFile == nil || *dataFile == "") && operation == encode {
-		fmt.Fprintln(os.Stderr, "Data file must be specified. Use stegify --help for more information.")
-		os.Exit(1)
-	}
-
-	switch operation {
-	case encode:
 		err := steg.MultiCarrierEncodeByFileNames(carriers, *dataFile, results)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
 	case decode:
+		if len(results) == 0 { // if no result provided use default
+			results = append(results, "result")
+		}
 		if len(results) != 1 {
 			fmt.Fprintln(os.Stderr, "Only one result file expected.")
 			os.Exit(1)

@@ -1,13 +1,11 @@
 package steg
 
 import (
-	"bytes"
 	"encoding/binary"
 	"fmt"
 	"github.com/DimitarPetrov/stegify/bits"
 	"image"
 	"io"
-	"io/ioutil"
 	"os"
 )
 
@@ -61,16 +59,8 @@ func Decode(carrier io.Reader, result io.Writer) error {
 //NOTE: The order of the carriers MUST be the same as the one when encoding.
 func MultiCarrierDecode(carriers []io.Reader, result io.Writer) error {
 	for i := 0; i < len(carriers); i++ {
-		var chunkResult bytes.Buffer
-		if err := Decode(carriers[i], &chunkResult); err != nil {
+		if err := Decode(carriers[i], result); err != nil {
 			return fmt.Errorf("error decoding chunk with index %d: %v", i, err)
-		}
-		chunkBytes, err := ioutil.ReadAll(&chunkResult)
-		if err != nil {
-			return err
-		}
-		if _, err := result.Write(chunkBytes); err != nil {
-			return err
 		}
 	}
 	return nil

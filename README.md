@@ -24,7 +24,7 @@ If multiple `Carrier` files are provided, the `Data` file will be split in piece
 | ---------------------------------------------|--------------------------------------------|--------------------------------------------|------------------------------------------------------------------|------------------------------------------------------------------|
 | <img src="examples/street.jpeg" width="500"> | <img src="examples/lake.jpeg" width="500"> | <img src="examples/video.gif" width="500"> | <img src="examples/test_multi_carrier_decode1.jpeg" width="500"> | <img src="examples/test_multi_carrier_decode2.jpeg" width="500"> |
  
-The `Result1` file contains a portion of the `Data` file hidden in it as well as `Result2` contains the rest. As always fully transparent.
+The `Result1` file contains one half of the `Data` file hidden in it and `Result2` the other. As always fully transparent.
 
 ## Install
 ```

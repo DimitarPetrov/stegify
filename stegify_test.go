@@ -154,9 +154,9 @@ func TestDecode(t *testing.T) {
 		},
 		{
 			name:     "Decode from multiple carriers using --cariers flag",
-			args:     []string{"decode", "--carriers", "examples/test_multi_carrier_decode1.jpeg examples/test_multi_carrier_decode2.jpeg", "--result", "result1.mp4"},
+			args:     []string{"decode", "--carriers", "examples/test_multi_carrier_decode1.jpeg examples/test_multi_carrier_decode2.jpeg", "--result", "result2.mp4"},
 			expected: "examples/video.mp4",
-			result:   "result1.mp4",
+			result:   "result2.mp4",
 		},
 		{
 			name:     "Decode without result flag should add default",

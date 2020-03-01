@@ -232,7 +232,7 @@ func TestMultiCarrierEncodeShouldReturnErrorWhenDataFileTooLarge(t *testing.T) {
 
 	var result1 bytes.Buffer
 	var result2 bytes.Buffer
-	err = steg.MultiCarrierEncode([]io.Reader{carrier1,carrier2}, data, []io.Writer{&result1, &result2})
+	err = steg.MultiCarrierEncode([]io.Reader{carrier1, carrier2}, data, []io.Writer{&result1, &result2})
 	if err == nil {
 		t.FailNow()
 	}
@@ -240,7 +240,7 @@ func TestMultiCarrierEncodeShouldReturnErrorWhenDataFileTooLarge(t *testing.T) {
 }
 
 func TestMultiCarrierEncodeByFileNamesShouldReturnErrorWhenDataFileTooLarge(t *testing.T) {
-	err := steg.MultiCarrierEncodeByFileNames([]string{"../examples/lake.jpeg","../examples/street.jpeg"}, "../examples/test_decode.jpeg", []string{"result1", "result2"})
+	err := steg.MultiCarrierEncodeByFileNames([]string{"../examples/lake.jpeg", "../examples/street.jpeg"}, "../examples/test_decode.jpeg", []string{"result1", "result2"})
 	if err == nil {
 		os.Remove("result1")
 		os.Remove("result2")

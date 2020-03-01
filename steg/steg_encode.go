@@ -104,7 +104,7 @@ func MultiCarrierEncode(carriers []io.Reader, data io.Reader, results []io.Write
 	chunksCount := 0
 	for i := 0; i < len(dataBytes) && chunksCount < len(carriers); i += chunkSize {
 		chunksCount++
-		if i+chunkSize >= len(dataBytes) || chunksCount == len(carriers){ // last iteration
+		if i+chunkSize >= len(dataBytes) || chunksCount == len(carriers) { // last iteration
 			dataChunks = append(dataChunks, bytes.NewReader(dataBytes[i:]))
 		}
 		dataChunks = append(dataChunks, bytes.NewReader(dataBytes[i:i+chunkSize]))
