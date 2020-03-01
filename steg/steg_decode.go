@@ -68,8 +68,8 @@ func MultiCarrierDecode(carriers []io.Reader, result io.Writer) error {
 
 //DecodeByFileNames performs steganography decoding of data previously encoded by the Encode function.
 //The data is decoded from file carrier and it is saved in separate new file
-func DecodeByFileNames(carrierFileName string, newFileName string) (err error) {
-	return MultiCarrierDecodeByFileNames([]string{carrierFileName}, newFileName)
+func DecodeByFileNames(carrierFileName string, resultName string) (err error) {
+	return MultiCarrierDecodeByFileNames([]string{carrierFileName}, resultName)
 }
 
 //MultiCarrierDecodeByFileNames performs steganography decoding of data previously encoded by the MultiCarrierEncode function.
