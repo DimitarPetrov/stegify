@@ -26,10 +26,20 @@ If multiple `Carrier` files are provided, the `Data` file will be split in piece
  
 The `Result1` file contains one half of the `Data` file hidden in it and `Result2` the other. As always fully transparent.
 
-## Install
+## Installation
+
+#### Installing from Source
 ```
-$ go get -u github.com/DimitarPetrov/stegify
+go get -u github.com/DimitarPetrov/stegify
 ```
+
+#### Installing via Homebrew (macOS)
+```
+brew tap DimitarPetrov/stegify
+brew install stegify
+```
+
+Or you can download a binary for your system [here](https://github.com/DimitarPetrov/stegify/releases).
 
 ## Usage
 
@@ -37,8 +47,9 @@ $ go get -u github.com/DimitarPetrov/stegify
 
 #### Single carrier encoding/decoding
 ```
-$ stegify encode --carrier <file-name> --data <file-name> --result <file-name>
-$ stegify decode --carrier <file-name> --result <file-name>
+stegify encode --carrier <file-name> --data <file-name> --result <file-name>
+
+stegify decode --carrier <file-name> --result <file-name>
 ```
 When encoding, the file with name given to flag `--data` is hidden inside the file with name given to flag
 `--carrier` and the resulting file is saved in new file in the current working directory under the
@@ -56,13 +67,13 @@ In both cases the flag `--result` could be omitted and default values will be us
 #### Multiple carriers encoding/decoding
 
 ```
-$ stegify encode --carriers "<file-names...>" --data <file-name> --results "<file-names...>"
+stegify encode --carriers "<file-names...>" --data <file-name> --results "<file-names...>"
 OR
-$ stegify encode --carrier <file-name> --carrier <file-name> ... --data <file-name> --result <file-name> --result <file-name> ...
+stegify encode --carrier <file-name> --carrier <file-name> ... --data <file-name> --result <file-name> --result <file-name> ...
 
-$ stegify decode --carriers "<file-names...>" --result <file-name>
+stegify decode --carriers "<file-names...>" --result <file-name>
 OR
-$ stegify decode --carrier <file-name> --carrier <file-name> ... --result <file-name>
+stegify decode --carrier <file-name> --carrier <file-name> ... --result <file-name>
 ```
 When encoding a data file in more than one carriers, the data file is split in *N* chunks, where *N* is number of provided carriers.
 Each of the chunks is then encoded in the respective carrier.
