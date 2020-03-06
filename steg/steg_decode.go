@@ -3,10 +3,11 @@ package steg
 import (
 	"encoding/binary"
 	"fmt"
-	"github.com/DimitarPetrov/stegify/bits"
 	"image"
 	"io"
 	"os"
+
+	"github.com/DimitarPetrov/stegify/bits"
 )
 
 //Decode performs steganography decoding of Reader with previously encoded data by the Encode function and writes to result Writer.

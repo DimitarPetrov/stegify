@@ -2,11 +2,12 @@ package steg_test
 
 import (
 	"bytes"
-	"github.com/DimitarPetrov/stegify/steg"
 	"io"
 	"io/ioutil"
 	"os"
 	"testing"
+
+	"github.com/DimitarPetrov/stegify/steg"
 )
 
 func BenchmarkDecode(b *testing.B) {

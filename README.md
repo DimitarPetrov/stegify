@@ -55,7 +55,7 @@ When encoding, the file with name given to flag `--data` is hidden inside the fi
 `--carrier` and the resulting file is saved in new file in the current working directory under the
 name given to flag `--result`.
 
-> **_NOTE:_** The result file won't have any file extension and therefore it should be specified explicitly in `--result` flag. 
+> **_NOTE:_** The results file won't have any file extension and therefore it should be specified explicitly in `--result` flag.
 
 When decoding, given a file name of a carrier file with previously encoded data in it, the data is extracted
 and saved in new file in the current working directory under the name given to flag `--result`.
@@ -67,13 +67,9 @@ In both cases the flag `--result` could be omitted and default values will be us
 #### Multiple carriers encoding/decoding
 
 ```
-stegify encode --carriers "<file-names...>" --data <file-name> --results "<file-names...>"
-OR
-stegify encode --carrier <file-name> --carrier <file-name> ... --data <file-name> --result <file-name> --result <file-name> ...
+stegify encode --carrier <comma-separated-file-names...> --data <file-name> --result "<comma-separated-file-names...>
 
-stegify decode --carriers "<file-names...>" --result <file-name>
-OR
-stegify decode --carrier <file-name> --carrier <file-name> ... --result <file-name>
+stegify decode --carrier "<comma-separated-file-names...>" --result <file-name>
 ```
 When encoding a data file in more than one carriers, the data file is split in *N* chunks, where *N* is number of provided carriers.
 Each of the chunks is then encoded in the respective carrier.
@@ -82,12 +78,9 @@ Each of the chunks is then encoded in the respective carrier.
 
 This kind of encoding provides one more layer of security and more flexibility regarding size limitations.
 
-In both cases the flag `--result/--results` could be omitted and default values will be used.
+In both cases the flag `--result` could be omitted and default values will be used.
 
-> **_NOTE:_** When encoding the number of the result files (if provided) should be equal to the number of carrier files. When decoding, exactly one result is expected. 
-
-When multiple carriers are provided with mixed kinds of flags, the names provided through `carrier` flag are taken first and with `carriers/c` flags second.
-Same goes for the `result/results` flag.
+> **_NOTE:_** When encoding the number of the result files (if provided) should be equal to the number of carrier files. When decoding, exactly one result is expected.
 
 
 ### Programmatically in your code

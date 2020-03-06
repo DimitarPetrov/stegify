@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	"github.com/DimitarPetrov/stegify/bits"
 	"image"
 	"image/draw"
 	_ "image/jpeg" //register jpeg image format
@@ -12,6 +11,8 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+
+	"github.com/DimitarPetrov/stegify/bits"
 )
 
 const dataSizeHeaderReservedBytes = 20 // 20 bytes results in 30 usable bits

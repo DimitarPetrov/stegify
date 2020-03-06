@@ -3,12 +3,13 @@ package main_test
 import (
 	"bytes"
 	"fmt"
-	"github.com/DimitarPetrov/stegify/steg"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
 	"testing"
+
+	"github.com/DimitarPetrov/stegify/steg"
 )
 
 func TestMain(m *testing.M) {
@@ -44,33 +45,9 @@ func TestEncode(t *testing.T) {
 		},
 		{
 			name:    "Encode with multiple carriers using --carrier flag and --result flag",
-			args:    []string{"encode", "--carrier", "examples/street.jpeg", "--carrier", "examples/lake.jpeg", "--data", "examples/video.mp4", "--result", "result1.jpeg", "--result", "result2.jpeg"},
+			args:    []string{"encode", "--carrier", "examples/street.jpeg,examples/lake.jpeg", "--data", "examples/video.mp4", "--result", "result1.jpeg,result2.jpeg"},
 			data:    "examples/video.mp4",
 			results: []string{"result1.jpeg", "result2.jpeg"},
-		},
-		{
-			name:    "Encode with multiple carriers using --carriers flag and --results flag",
-			args:    []string{"encode", "--carriers", "examples/street.jpeg examples/lake.jpeg", "--data", "examples/video.mp4", "--results", "result3.jpeg result4.jpeg"},
-			data:    "examples/video.mp4",
-			results: []string{"result3.jpeg", "result4.jpeg"},
-		},
-		{
-			name:    "Encode with multiple carriers using --carriers flag and --result flag",
-			args:    []string{"encode", "--carriers", "examples/street.jpeg examples/lake.jpeg", "--data", "examples/video.mp4", "--result", "result5.jpeg", "--result", "result6.jpeg"},
-			data:    "examples/video.mp4",
-			results: []string{"result5.jpeg", "result6.jpeg"},
-		},
-		{
-			name:    "Encode with multiple carriers using --carrier flag and --results flag",
-			args:    []string{"encode", "--carrier", "examples/street.jpeg", "--carrier", "examples/lake.jpeg", "--data", "examples/video.mp4", "--results", "result7.jpeg result8.jpeg"},
-			data:    "examples/video.mp4",
-			results: []string{"result7.jpeg", "result8.jpeg"},
-		},
-		{
-			name:    "Encode with multiple carriers using mixed flags",
-			args:    []string{"encode", "--carriers", "examples/street.jpeg", "--carrier", "examples/lake.jpeg", "--data", "examples/video.mp4", "--results", "result9.jpeg", "--result", "result10.jpeg"},
-			data:    "examples/video.mp4",
-			results: []string{"result10.jpeg", "result9.jpeg"}, // --carrier/--result is with priority over --carriers/--results
 		},
 		{
 			name:    "Encode with single carrier should add default result name",
@@ -79,14 +56,14 @@ func TestEncode(t *testing.T) {
 			results: []string{"result0"},
 		},
 		{
-			name:    "Encode with multiple carriers using --carriers should add default result names",
-			args:    []string{"encode", "--carriers", "examples/street.jpeg examples/lake.jpeg", "--data", "examples/video.mp4"},
+			name:    "Encode with multiple carriers using --carrier should add default result names",
+			args:    []string{"encode", "--carrier", "examples/street.jpeg,examples/lake.jpeg", "--data", "examples/video.mp4"},
 			data:    "examples/video.mp4",
 			results: []string{"result0", "result1"},
 		},
 		{
 			name:       "Encode carriers count does not match results count should return an error",
-			args:       []string{"encode", "--carriers", "examples/street.jpeg examples/lake.jpeg", "--data", "examples/video.mp4", "--results", "result1.jpeg"},
+			args:       []string{"encode", "--carrier", "examples/street.jpeg,examples/lake.jpeg", "--data", "examples/video.mp4", "--result", "result1.jpeg"},
 			shouldFail: true,
 		},
 		{
@@ -148,15 +125,9 @@ func TestDecode(t *testing.T) {
 		},
 		{
 			name:     "Decode from multiple carriers using --carier flag",
-			args:     []string{"decode", "--carrier", "examples/test_multi_carrier_decode1.jpeg", "--carrier", "examples/test_multi_carrier_decode2.jpeg", "--result", "result1.mp4"},
+			args:     []string{"decode", "--carrier", "examples/test_multi_carrier_decode1.jpeg,examples/test_multi_carrier_decode2.jpeg", "--result", "result1.mp4"},
 			expected: "examples/video.mp4",
 			result:   "result1.mp4",
-		},
-		{
-			name:     "Decode from multiple carriers using --cariers flag",
-			args:     []string{"decode", "--carriers", "examples/test_multi_carrier_decode1.jpeg examples/test_multi_carrier_decode2.jpeg", "--result", "result2.mp4"},
-			expected: "examples/video.mp4",
-			result:   "result2.mp4",
 		},
 		{
 			name:     "Decode without result flag should add default",
@@ -166,7 +137,7 @@ func TestDecode(t *testing.T) {
 		},
 		{
 			name:       "Decode with multiple results should fail",
-			args:       []string{"decode", "--carriers", "examples/test_multi_carrier_decode1.jpeg examples/test_multi_carrier_decode2.jpeg", "--result", "result1.mp4", "--result", "result2.mp4"},
+			args:       []string{"decode", "--carrier", "examples/test_multi_carrier_decode1.jpeg,examples/test_multi_carrier_decode2.jpeg", "--result", "result1.mp4,result2.mp4"},
 			shouldFail: true,
 		},
 		{
