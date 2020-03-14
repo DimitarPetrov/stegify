@@ -94,13 +94,14 @@ func parseOperation() string {
 	}
 	operation := os.Args[1]
 	if operation != encode && operation != decode {
-		helpFlags := map[string]bool{
-			"--help": true,
-			"-help":  true,
-			"--h":    true,
-			"-h":     true,
+		helpFlags := map[string]struct{}{
+			"--help": struct{}{},
+			"-help":  struct{}{},
+			"--h":    struct{}{},
+			"-h":     struct{}{},
 		}
-		if helpFlags[operation] {
+
+		if _, ok := helpFlags[operation]; ok {
 			flag.Parse()
 			os.Exit(0)
 		}
