@@ -100,3 +100,13 @@ or raw Readers and Writers. You can visit [godoc](https://godoc.org/github.com/D
 
 If carrier file is in jpeg or jpg format, after encoding the result file image will be png encoded (therefore it may be bigger in size)
 despite of file extension specified in the result flag.
+
+## Showcases
+
+### 🚩 Codefest’19
+
+`stegify` was used for one of the *Capture The Flag* challenges in [**Codefest’19**](https://www.hackerrank.com/codefest19-ctf).
+
+Participants were given a photo of a bunch of "innocent" cats. Nothing suspicious right? Think again!
+
+You can read more [here](https://medium.com/bugbountywriteup/codefest19-ctf-writeups-a8f4e9b45d1) and [here](https://medium.com/@markonsecurity/image-challenges-1-cats-are-innocent-right-69cd4220bc99). 
