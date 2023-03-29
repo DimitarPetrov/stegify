@@ -30,7 +30,7 @@ The `Result1` file contains one half of the `Data` file hidden in it and `Result
 
 #### Installing from Source
 ```
-go get -u github.com/DimitarPetrov/stegify
+go install github.com/DimitarPetrov/stegify@latest
 ```
 
 #### Installing via Homebrew (macOS)
